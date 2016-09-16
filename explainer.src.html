@@ -1,0 +1,228 @@
+<pre class="metadata">
+Title: Isolation Explainer
+Status: DREAM
+Shortname: isolation
+Level: None
+Editor: Emily Stark, Google Inc., estark@google.com
+Editor: Mike West 56384, Google Inc., mkwst@google.com
+Abstract: Isolation: Good feature, or the best feature?
+Indent: 2
+Version History: https://github.com/mikewest/isolation/commits/master/index.src.html
+!Participate: <a href="https://github.com/mikewest/isolation/issues/new">File an issue</a> (<a href="https://github.com/mikewest/isolation/issues">open issues</a>)
+Markup Shorthands: css off, markdown on
+</pre>
+<pre class="biblio">
+{
+  "HEIST": {
+    "authors": [ "Mathy Vanhoef", "Tom Van Goethem" ],
+    "title": "HEIST: HTTP Encrypted Information Can Be Stolen Through TCP-Windows",
+    "href": "https://www.blackhat.com/us-16/briefings/schedule/index.html#heist-http-encrypted-information-can-be-stolen-through-tcp-windows-3379"
+  },
+  "PIXEL-PERFECT": {
+    "authors": [ "Paul Stone" ],
+    "href": "http://www.contextis.com/documents/2/Browser_Timing_Attacks.pdf",
+    "title": "Pixel Perfect Timing Attacks with HTML5"
+  },
+  "SITE-ISOLATION": {
+    "authors": [ "The Chromium Authors" ],
+    "href": "https://dev.chromium.org/developers/design-documents/site-isolation",
+    "title": "Chromium's Site Isolation Design Document"
+  },
+  "FOREIGN-FETCH": {
+    "href": "https://github.com/w3c/ServiceWorker/blob/master/foreign_fetch_explainer.md",
+    "title": "Foreign Fetch Explained"
+  }
+}
+</pre>
+
+Introduction {#intro}
+============
+
+Authors of security-critical applications want the web's low-friction install process, its
+linkability, and its cross-platform nature, but are understandably nervous about hosting very
+powerful applications on the web alongside malicious content that can attack in any number of ways.
+Chrome Apps used to be an attractive choice for building security-critical applications, since
+Chrome Apps are cross-platform (across any desktop platform) and a somewhat lower-friction install
+process than a native app, while offering a greater degree of isolation than a normal web app gets.
+(For example, the browser prevents regular web content from initiating a navigation to a Chrome App
+URL.) However, Chrome Apps are being deprecated in favor of the open web, and, indeed, it would be
+nice for security-critical applications to be able to run in any browser with the degree of
+isolation that they desire.
+
+This document proposes an "Isolate-Me" concept, in which an origin can request to be isolated from
+other web content. This concept targets authors of security-critical web applications who want to
+give up some of the features of being on the open web (such as full linkability) in exchange for
+better protection from malicious content.
+
+Threat Model {#threat}
+============
+
+We consider a security-critical application (`very-important-bank.com`) which wants to isolate
+itself from regular web content like `evil.com`. We assume that `very-important-bank.com` is a
+large, complicated site with many developers, some of whom occasionally make mistakes, such as
+accidentally opening up a reflected XSS vulnerability. We also assume that the user does not know
+that `evil.com` is evil, and also that the user is not necessarily a power user; thus the user
+does not take precautions such as using `evil.com` and `very-important-bank.com` in separate
+profiles. In our threat model, `evil.com` might try to attack `very-important-bank.com` in any of
+the following ways:
+
+1.  `evil.com` might cause the user’s browser to send a request to `very-important-bank.com` that
+    exploits an XSS or CSRF vulnerability (e.g. by initiating a navigation).
+
+2.  `very-important-bank.com` might open a link to `evil.com` (because, for example, a content
+    writer posted a link to `evil.com` without knowing that it was evil). This allows `evil.com`
+    to obtain a reference to the `very-important-bank.com` window via window.opener, from which it
+    could, for example, abuse a vulnerable {{Window/postMessage()}} API. Similarly, `evil.com`
+    could open a window to `very-important-bank.com` to obtain a reference to its window.
+
+3.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
+    `very-important-bank.com` data and cookies. While we don’t aim to give hard guarantees about
+    protection from UXSS, we hope to mitigate some of the risks on a best-effort basis.
+
+4.  `evil.com` and `very-important-bank.com` might in fact be `evil.example.com` and
+    `very-important-bank.example.com`. `evil.example.com` might try to set a cookie for all of
+    `example.com` in hopes that it can fix a session or CSRF token for the user on
+    `very-important-bank.example.com`.
+
+5.  `evil.com` might be able to extract data from `very-important-bank.com` by loading its resources
+    or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
+    headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
+
+6.  `evil.com` might be able to extract data from `very-important-bank.com`'s cross-site
+    dependencies (say investments-r-us.biz) when they require client-side authentication to access
+    data.
+
+Communication Mechanisms {#communication}
+========================
+
+Below are some of the ways that the browser can limit cross-origin communication. An isolated origin
+might want to opt into some or all of these protections. Initially we will target apps that want to
+opt into all of these protections.
+
+1.  Navigation limitations. Similar to Entry Point Regulation [[EPR]], other origins should not be
+    allowed to initiate navigations to arbitrary endpoints on isolated origins. This prevents a
+    malicious website from exploiting an XSS or CSRF attack by triggering a navigation to the victim
+    app.
+
+2.  <a attribute lt="opener">`window.opener`</a>. Isolated app origins should be able to disown
+    windows that they open or are opened by, so that other origins are not able to obtain references
+    to {{Window}} objects that are associated with isolated app origins. This prevents malicious
+    websites from exploiting vulnerable {{Window/postMessage()}} APIs.
+
+3.  Process isolation. Isolated origins should run in their own processes, when possible. This
+    prevents malicious websites from exploiting browser bugs (UXSS, renderer remote code execution
+    without a sandbox escape) to attack isolated origins. The threat model that process isolation
+    addresses is described in more detail in the threat model section of Chromium's Site Isolation
+    project page [[SITE-ISOLATION]]. Note that process isolation does not protect against, for
+    example, renderer RCE with a sandbox escape, and that process isolation is a best-effort attempt
+    made by the browser, not a guarantee that user agents provide.
+
+4.  Origin-scoped cookies. If `foo.example.com` is an isolated origin, then `example.com`
+    shouldn’t be able to set cookies for it. That is, `.example.com` cookies should not be sent
+    along with requests to `foo.example.com`.
+
+5.  Double-keyed storage. When an isolated origin makes a request to a third-party origin
+    third-party.com, that request should use a separate cookie jar from when any other origin makes
+    a request to third-party.com. Similarly, if an isolated origin embeds `third-party.com` in an
+    <{iframe}>, the frame should use a separate cookie jar and separate storage (such as
+    {{localStorage}}) from when `third-party.com` is loaded in any other context.
+
+Isolation Policy {#isolation}
+================
+
+We envision that an app could isolate itself by setting an Origin Policy. Initially, the
+`Isolate-Me` policy would instruct the browser to isolate the origin completely. In later versions,
+the origin could potentially toggle different switches on and off to instruct the browser to isolate
+it in some ways but not others. A proposed set of features constituting an isolated origin is:
+
+1.  Force all cookies to be `SameSite`.
+
+2.  Do not allow the isolated origin to be framed by cross-origin content.
+
+3.  When the isolated origin frames cross-origin content, do not give the cross-origin content a
+    handle to the isolated origin’s window.
+
+4.  Double-key storage for third-party requests that the isolated origin requests. In particular,
+    use a separate cookie jar when on an isolated origin, and provide separate DOM storage for
+    cross-origin content that the isolated origin embeds.
+
+5.  Do not allow any navigations from web content to the isolated origin, or only allow navigations
+    from web content to the root URL on the isolated origin. (See “Open questions” below.)
+
+6.  When the isolated origin opens a new window, disown/neueter the opened page’s window.opener.
+
+7.  When an origin opens an isolated origin in another window, disown/neuter that origin’s
+    references to the isolated origin’s window.
+
+8.  When sending `Cookie` headers to the isolated origin, do not send cookies that were not set by
+    the origin itself, and, similarly, do not include them in `document.cookie`.
+
+While there is no explicit switch for process isolation, the user agent should run any isolated
+origin in its own separate process whenever possible. This is not a firm guarantee (especially since
+not all browsers implement per-site process isolation at all), but rather a best-effort attempt to
+mitigate the risks of UXSS bugs.
+
+The user agent should segregate cookie storage, localStorage, socket pools, permission storage, and
+other local state by Isolate-Me policy, such that when an origin sets an Isolate-Me policy, it gets
+a different cookie jar, etc. The isolated version of `foo.com` should not be contaminated by the
+previously un-isolated version of `foo.com`.
+
+Open Questions {#questions}
+==============
+
+There are many open questions, but here are a few of the biggest:
+
+1.  How should navigations be limited? Limiting navigations breaks linkability and hinders
+    functionality, but improves defense against reflected XSS and CSRF. Striking the right balance
+    here will be tricky. We could only allow navigations to the root URL on the isolated origin, or
+    we could transform navigations into a navigation to the root URL with some sort of message to
+    allow the site to decide whether the navigation should go through. Or foreign fetch could be
+    modified to allow the isolated origin’s Service Worker to intercept the navigation and decide
+    whether it should be allowed. [[FOREIGN-FETCH]]
+
+2.  Federated authentication is hard in this model. For applications that accept username/password
+    authentication, things work just fine: the user navigates to `example.com` as an isolated
+    origin, submits a form POST from `example.com/` to `example.com/login`, an origin-scoped cookie
+    is set, and they're good to go. It's much less clear how we can reasonably support
+    `isolate.example.com` authenticating via a top-level navigation to `accounts.example.com` (or
+    `speakerdeck.com` via a top-level navigation to `github.com`), as the user will be moving in and
+    out of the isolate's context.
+
+    If OAuth flows are out of scope, then I'm worried that we'll end up narrowing the target
+    audience too far for this to be a useful concept.
+
+Related Work {#related}
+============
+
+Containers and Profiles {#containers}
+-----------------------
+
+The Isolate-Me concept is closely related to Firefox Containers and Chrome
+profiles, which allow the user to isolate sites from each other. For example, if the user always
+accesses `evil.com` in a Dangerous container/profile and `very-important-bank.com` in a Banking
+container/profile, then `evil.com` is not able to effectively exploit an XSS vulnerability in
+`very-important-bank.com` by navigating to a vulnerable URL; the vulnerable URL would open in
+the Dangerous container/profile and would not contain any of the user’s data or cookies from the
+Banking container/profile. The Isolate-Me concept gives a similar benefit, but by letting the
+site author choose to isolate the site rather than letting the user choose. Isolate-Me is also
+explicitly on the basis of origin; containers and profiles do not isolate origins from each
+other within the same container.
+
+Firefox containers and Chrome profiles have other benefits that are out of scope for the
+Isolate-Me concept. For example, a user may want to have different Home/Work containers and stay
+logged in as a different Google account in each; the Isolate-Me concept is orthogonal to this
+use case. Similarly, a user may want to do all their online shopping in a Shopping container so
+that the ads that they get in their Work browsing do not reflect their personal shopping habits.
+This use case is also out of scope for Isolate-Me.
+
+Site Isolation {#site-isolation}
+--------------
+
+Chrome has a large project underway to isolate each site in its own process.
+Much of the site isolation infrastructure is a prerequisite for implementing Isolate-Me. For
+example, if `foo.com` is an isolated origin and chooses to embed `bar.com` in a frame, `bar.com`
+should run in a separate process. One of the challenges for site isolation is that it would be
+far too resource-intensive to actually give every site its own process, so it would be useful
+for the browser to have signals, like Isolate-Me, for which sites really should be isolated in
+their own processes and which can share. (However, we should take care not to make Isolate-Me
+too attractive, for fear that all sites will turn it on whether or not they need it.)
