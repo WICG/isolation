@@ -1334,8 +1334,9 @@ Possible extra rowspan handling
      <dt>Issue Tracking:
      <dd><a href="https://github.com/mikewest/isolation/issues/">GitHub</a>
      <dt class="editor">Editors:
-     <dd class="editor p-author h-card vcard"><a class="p-name fn u-email email" href="mailto:estark@google.com">Emily Stark</a> (<span class="p-org org">Google Inc.</span>)
-     <dd class="editor p-author h-card vcard" data-editor-id="56384"><a class="p-name fn u-email email" href="mailto:mkwst@google.com">Mike West</a> (<span class="p-org org">Google Inc.</span>)
+     <dd class="editor p-author h-card vcard"><span class="p-name fn">Emily Stark</span>
+     <dd class="editor p-author h-card vcard"><span class="p-name fn">Mike West</span>
+     <dd class="editor p-author h-card vcard"><span class="p-name fn">Joel Weinberger</span>
      <dt>Participate:
      <dd><span><a href="https://github.com/mikewest/isolation/issues/new">File an issue</a> (<a href="https://github.com/mikewest/isolation/issues">open issues</a>)</span>
     </dl>
@@ -1391,13 +1392,13 @@ Chrome Apps used to be an attractive choice for building security-critical appli
 Chrome Apps are cross-platform (across any desktop platform) and a somewhat lower-friction install
 process than a native app, while offering a greater degree of isolation than a normal web app gets.
 (For example, the browser prevents regular web content from initiating a navigation to a Chrome App
-URL.) However, Chrome Apps are being deprecated in favor of the open web, and, indeed, it would be
-nice for security-critical applications to be able to run in any browser with the degree of
-isolation that they desire.</p>
+URL.) However, Chrome Apps are deprecated in favor of the open web, and, indeed, it would be nice
+for security-critical applications to be able to run in any browser with the degree of isolation
+that they desire.</p>
    <p>This document proposes an "Isolate-Me" concept, in which an origin can request to be isolated from
-other web content. This concept targets authors of security-critical web applications who want to
-give up some of the features of being on the open web (such as full linkability) in exchange for
-better protection from malicious content.</p>
+other web content. Developers responsible for security-critical web applications can choose to trade
+away some of the features of being on the open web (such as full linkability) in exchange for better
+protection from maliciousness.</p>
    <h2 class="heading settled" data-level="2" id="threat"><span class="secno">2. </span><span class="content">Threat Model</span><a class="self-link" href="#threat"></a></h2>
    <p>We consider a security-critical application (<code>very-important-bank.com</code>) which wants to isolate
 itself from regular web content like <code>evil.com</code>. We assume that <code>very-important-bank.com</code> is a
@@ -1413,8 +1414,10 @@ the following ways:</p>
   exploits an XSS or CSRF vulnerability (e.g. by initiating a navigation).</p>
     <li data-md="">
      <p><code>very-important-bank.com</code> might open a link to <code>evil.com</code> (because, for example, a content
-  writer posted a link to <code>evil.com</code> without knowing that it was evil). This allows <code>evil.com</code> to obtain a reference to the <code>very-important-bank.com</code> window via window.opener, from which it
-  could, for example, abuse a vulnerable <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage()</a></code> API. Similarly, <code>evil.com</code> could open a window to <code>very-important-bank.com</code> to obtain a reference to its window.</p>
+  writer posted a link to <code>evil.com</code> without knowing that it was evil). This allows <code>evil.com</code> to obtain a reference to the <code>very-important-bank.com</code> window via the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener"><code>window.opener</code></a> attribute, which opens up communication channels
+  (<code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage()</a></code>, frame counting and traversal, etc.) that <code>very-important-bank.com</code> might not be expecting.</p>
+    <li data-md="">
+     <p>Likewise, <code>evil.com</code> can obtain such a reference via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>.</p>
     <li data-md="">
      <p><code>evil.com</code> might exploit a vulnerability in the browser itself (UXSS) to gain access to <code>very-important-bank.com</code> data and cookies. While we don’t aim to give hard guarantees about
   protection from UXSS, we hope to mitigate some of the risks on a best-effort basis.</p>
@@ -1426,8 +1429,8 @@ the following ways:</p>
   headers, to timing attacks like <a data-link-type="biblio" href="#biblio-heist">[HEIST]</a>, <a data-link-type="biblio" href="#biblio-pixel-perfect">[PIXEL-PERFECT]</a>, etc.</p>
     <li data-md="">
      <p><code>evil.com</code> might be able to extract data from <code>very-important-bank.com</code>'s cross-site
-  dependencies (say investments-r-us.biz) when they require client-side authentication to access
-  data.</p>
+  dependencies (say <code>investments-r-us.biz</code>), as its users may authenticate to these dependencies,
+  then exposing that ambient authority to attack.</p>
    </ol>
    <h2 class="heading settled" data-level="3" id="communication"><span class="secno">3. </span><span class="content">Communication Mechanisms</span><a class="self-link" href="#communication"></a></h2>
    <p>Below are some of the ways that the browser can limit cross-origin communication. An isolated origin
@@ -1697,6 +1700,7 @@ too attractive, for fear that all sites will turn it on whether or not they need
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage">localStorage</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener">opener</a>
      <li><a href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage(message, targetOrigin, transfer)</a>
     </ul>

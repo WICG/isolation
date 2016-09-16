@@ -3,8 +3,9 @@ Title: Isolation Explainer
 Status: DREAM
 Shortname: isolation
 Level: None
-Editor: Emily Stark, Google Inc., estark@google.com
-Editor: Mike West 56384, Google Inc., mkwst@google.com
+Editor: Emily Stark
+Editor: Mike West
+Editor: Joel Weinberger
 Abstract: Isolation: Good feature, or the best feature?
 Indent: 2
 Version History: https://github.com/mikewest/isolation/commits/master/index.src.html
@@ -45,14 +46,14 @@ Chrome Apps used to be an attractive choice for building security-critical appli
 Chrome Apps are cross-platform (across any desktop platform) and a somewhat lower-friction install
 process than a native app, while offering a greater degree of isolation than a normal web app gets.
 (For example, the browser prevents regular web content from initiating a navigation to a Chrome App
-URL.) However, Chrome Apps are being deprecated in favor of the open web, and, indeed, it would be
-nice for security-critical applications to be able to run in any browser with the degree of
-isolation that they desire.
+URL.) However, Chrome Apps are deprecated in favor of the open web, and, indeed, it would be nice
+for security-critical applications to be able to run in any browser with the degree of isolation
+that they desire.
 
 This document proposes an "Isolate-Me" concept, in which an origin can request to be isolated from
-other web content. This concept targets authors of security-critical web applications who want to
-give up some of the features of being on the open web (such as full linkability) in exchange for
-better protection from malicious content.
+other web content. Developers responsible for security-critical web applications can choose to trade
+away some of the features of being on the open web (such as full linkability) in exchange for better
+protection from maliciousness.
 
 Threat Model {#threat}
 ============
@@ -71,26 +72,29 @@ the following ways:
 
 2.  `very-important-bank.com` might open a link to `evil.com` (because, for example, a content
     writer posted a link to `evil.com` without knowing that it was evil). This allows `evil.com`
-    to obtain a reference to the `very-important-bank.com` window via window.opener, from which it
-    could, for example, abuse a vulnerable {{Window/postMessage()}} API. Similarly, `evil.com`
-    could open a window to `very-important-bank.com` to obtain a reference to its window.
+    to obtain a reference to the `very-important-bank.com` window via the
+    <a attribute lt="opener">`window.opener`</a> attribute, which opens up communication channels
+    ({{Window/postMessage()}}, frame counting and traversal, etc.) that `very-important-bank.com`
+    might not be expecting.
+    
+3.  Likewise, `evil.com` can obtain such a reference via {{Window/open()}}.
 
-3.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
+4.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
     `very-important-bank.com` data and cookies. While we don’t aim to give hard guarantees about
     protection from UXSS, we hope to mitigate some of the risks on a best-effort basis.
 
-4.  `evil.com` and `very-important-bank.com` might in fact be `evil.example.com` and
+5.  `evil.com` and `very-important-bank.com` might in fact be `evil.example.com` and
     `very-important-bank.example.com`. `evil.example.com` might try to set a cookie for all of
     `example.com` in hopes that it can fix a session or CSRF token for the user on
     `very-important-bank.example.com`.
 
-5.  `evil.com` might be able to extract data from `very-important-bank.com` by loading its resources
+6.  `evil.com` might be able to extract data from `very-important-bank.com` by loading its resources
     or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
     headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
 
-6.  `evil.com` might be able to extract data from `very-important-bank.com`'s cross-site
-    dependencies (say investments-r-us.biz) when they require client-side authentication to access
-    data.
+7.  `evil.com` might be able to extract data from `very-important-bank.com`'s cross-site
+    dependencies (say `investments-r-us.biz`), as its users may authenticate to these dependencies,
+    then exposing that ambient authority to attack.
 
 Communication Mechanisms {#communication}
 ========================
