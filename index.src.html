@@ -1,0 +1,124 @@
+<pre class="metadata">
+Title: Origin Isolated
+Status: DREAM
+Shortname: origin-isolation
+Level: None
+Editor: Emily Stark
+Editor: Mike West
+Editor: Joel Weinberger
+Abstract: Isolation: Good feature, or the best feature?
+Indent: 2
+Version History: https://github.com/mikewest/isolation/commits/master/index.src.html
+!Participate: <a href="https://github.com/mikewest/isolation/issues/new">File an issue</a> (<a href="https://github.com/mikewest/isolation/issues">open issues</a>)
+Markup Shorthands: css off, markdown on
+</pre>
+
+Introduction {#intro}
+============
+
+Authors of security-critical applications want the web's low-friction install process, its
+linkability, and its cross-platform nature, but are understandably nervous about hosting very
+powerful applications on the web alongside malicious content that can attack in any number of ways.
+Chrome Apps used to be an attractive choice for building security-critical applications, since
+Chrome Apps are cross-platform (across any desktop platform) and a somewhat lower-friction install
+process than a native app, while offering a greater degree of isolation than a normal web app gets.
+(For example, the browser prevents regular web content from initiating a navigation to a Chrome App
+URL.) However, Chrome Apps are deprecated in favor of the open web, and, indeed, it would be nice
+for security-critical applications to be able to run in any browser with the degree of isolation
+that they desire.
+
+This document proposes an isolation mechanism which an origin can opt-into in order to reduce their
+exposure to other web content. Developers responsible for security-critical web applications can
+choose to trade away some of the features of being on the open web (such as full linkability) in
+exchange for better protection from maliciousness.
+
+Threat Model {#threat}
+------------
+
+MegaCorp, Inc. has deployed a security-critical application on `example.com`. Malicious attackers
+in control of `evil.com` might attack this application in a number of ways which this document aims
+to address:
+
+1.  `evil.com` might cause the user's browser to send a request to `example.com` that exploits a
+    cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerability. Such
+    vulnerabilities might be triggered by navigational requests (via <{iframe}> or
+    {{Window/open()}}), or by subresource requests (via <{img}>, etc).
+
+2.  `example.com` might open a link to `evil.com` (for example, user-generated content could include
+    an auto-linked reference to that origin). This allows `evil.com` to obtain a reference to the
+    `example.com` window via the <a attribute lt="opener">`window.opener`</a> attribute, which opens
+    up communication channels ({{Window/postMessage()}}, frame counting and traversal, etc.) that
+    `example.com` might not be expecting.
+    
+3.  Likewise, `evil.com` can obtain such a reference via {{Window/open()}}.
+
+4.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
+    `example.com` data and cookies. 
+    
+    Note: The mechanism proposed in this document does not aim to give hard guarantees about
+    protection from UXSS, but does hope to mitigate some of the risks on a best-effort basis.
+    
+5.  `evil.com` might be able to extract data from `example.com` by loading its resources
+    or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
+    headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
+
+6.  `evil.com` might be able to extract data from `example.com`'s cross-site
+    dependencies (say `investments-r-us.biz`), as its users may authenticate to these dependencies,
+    then exposing that ambient authority to attack.
+
+7.  `evil.com` and `example.com` might in fact be `evil.example.com` and `app.example.com`, in which
+    case:
+    
+    1.  `evil.example.com` might try to set a cookie for all of `example.com` in hopes that it can
+        fix a session or CSRF token for the user on `app.example.com`, or exploit .
+
+    2.  `evil.example.com` might take advantage of `app.example.com`'s (ill-advised) loosening of
+        the same-origin policy via {{Document}}'s {{Document/domain}} attribute.
+
+Mitigation Strategy {#strategy}
+-------------------
+
+To address the threats above, this document details an origin-wide isolation mechanism that aims to
+break the communication channels between `example.com` and `evil.com`. When MegaCorp, Inc. opts-in
+to this mechanism, the user agent will enforce the following:
+
+1.  Resources from `example.com` may not be framed by cross-origin contexts. That is, the user
+    agent will act as though `Content-Security-Policy: frame-ancestors 'self'` is delivered with
+    each resource. This prevents `evil.com` from exploiting attacks that require control over
+    `example.com`'s browsing context ([[PIXEL-PERFECT]], as well as straightforward clickjacking),
+    or access to `example.com`'s {{Window}} (via {{HTMLIFrameElement/contentWindow}}).
+
+2.  Cross-origin resources which `example.com` frames are not given access to `window.top` or
+    `window.parent` (those accessors will return `null`). This prevents `evil.com` from exploiting
+    attacks which require access to `example.com`'s {{Window}}, or navigating the user to an
+    unexpected URL to replace `example.com` in the top-level browsing context.
+
+3.  When `example.com` opens a new, cross-origin window (via {{Window/open()}},
+    `<a target="_blank">...</a>`, etc.), the new window will <a>disown its opener</a>, and the
+    call to {{Window/open()}} will return `null`. That is, the user agent will act as though
+    <a>noopener</a> is specified on outgoing links and {{Window/open()}} calls.
+    
+    Likewise, when `example.com` is opened from a cross-origin window, it will <a>disown its
+    opener</a>, and the return value of {{Window/open()}} in the opener context will be `null`.
+
+4.  Something something cookies.
+
+    ISSUE: I have no idea what makes sense here.
+
+5.  Something something cross-origin navigation to `example.com`.
+
+    ISSUE: Force preflights for navigational requests from `evil.com` to `example.com`. A non-2XX
+    response will result in returning a synthetic client-side redirect response to the root of the
+    origin.
+
+6.  Something something cross-origin subresources loaded from `example.com`.
+
+    ISSUE: Should we allow subresource requests from `evil.com` to `example.com` at all? If not,
+    easy: network error. If so, we need to either double-key `example.com`'s cookies, or ensure
+    that they're all treated as `SameSite=Strict`.
+
+7.  The user agent should load `example.com` into a separate process from other web content.
+
+    Note: This is not a firm guarantee (especially since not all browsers implement per-site process
+    isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.
+
