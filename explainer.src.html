@@ -153,7 +153,8 @@ it in some ways but not others. A proposed set of features constituting an isola
 5.  Do not allow any navigations from web content to the isolated origin, or only allow navigations
     from web content to the root URL on the isolated origin. (See “Open questions” below.)
 
-6.  When the isolated origin opens a new window, disown/neueter the opened page’s window.opener.
+6.  When the isolated origin opens a new window to a cross-origin URL, disown/neueter the opened
+    page’s window.opener.
 
 7.  When an origin opens an isolated origin in another window, disown/neuter that origin’s
     references to the isolated origin’s window.
