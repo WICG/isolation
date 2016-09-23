@@ -14,6 +14,11 @@ Markup Shorthands: css off, markdown on
 </pre>
 <pre class="biblio">
 {
+  "APP-ISOLATION": {
+    "authors": [ "Eric Y. Chen", "Jason Bau", "Charles Reis", "Adam Barth", "Collin Jackson" ],
+    "href": "http://research.google.com/pubs/pub37198.html",
+    "title": "App Isolation: Get the Security of Multiple Browsers with Just One"
+  },
   "HEIST": {
     "authors": [ "Mathy Vanhoef", "Tom Van Goethem" ],
     "title": "HEIST: HTTP Encrypted Information Can Be Stolen Through TCP-Windows",
@@ -198,6 +203,18 @@ There are many open questions, but here are a few of the biggest:
 
 Related Work {#related}
 ============
+
+App Isolation {#app-isolation}
+-----------------------
+
+A 2011 paper [[APP-ISOLATION]] proposed very similar ideas to those that are explored in this
+document. App Isolation proposes that sites opt in to app isolation via a well known manifest URL,
+which is fetched before loading the site. App Isolation argues that two properties, entry point
+restriction and state isolation, can provide the security benefits of using multiple browsers to
+separate sensitive from non-sensitive sites. They implement these properties in Chrome, analyze
+their claims with a formal model, and argue that entry point restriction works well for some types
+of sites (online banking) but not others (social or news sites that rely on deep linking and
+sharing).
 
 Containers and Profiles {#containers}
 -----------------------

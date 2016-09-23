@@ -1001,7 +1001,7 @@
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Isolation Explainer</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-09-20">20 September 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-09-23">23 September 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Version History:
@@ -1019,7 +1019,7 @@
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 20 September 2016,
+In addition, as of 23 September 2016,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1041,8 +1041,9 @@ Parts of this work may be from another specification document.  If so, those par
     <li>
      <a href="#related"><span class="secno">6</span> <span class="content">Related Work</span></a>
      <ul class="toc">
-      <li><a href="#containers"><span class="secno">6.1</span> <span class="content">Containers and Profiles</span></a>
-      <li><a href="#site-isolation"><span class="secno">6.2</span> <span class="content">Site Isolation</span></a>
+      <li><a href="#app-isolation"><span class="secno">6.1</span> <span class="content">App Isolation</span></a>
+      <li><a href="#containers"><span class="secno">6.2</span> <span class="content">Containers and Profiles</span></a>
+      <li><a href="#site-isolation"><span class="secno">6.3</span> <span class="content">Site Isolation</span></a>
      </ul>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
@@ -1196,7 +1197,16 @@ previously un-isolated version of <code>foo.com</code>.</p>
   audience too far for this to be a useful concept.</p>
    </ol>
    <h2 class="heading settled" data-level="6" id="related"><span class="secno">6. </span><span class="content">Related Work</span><a class="self-link" href="#related"></a></h2>
-   <h3 class="heading settled" data-level="6.1" id="containers"><span class="secno">6.1. </span><span class="content">Containers and Profiles</span><a class="self-link" href="#containers"></a></h3>
+   <h3 class="heading settled" data-level="6.1" id="app-isolation"><span class="secno">6.1. </span><span class="content">App Isolation</span><a class="self-link" href="#app-isolation"></a></h3>
+   <p>A 2011 paper <a data-link-type="biblio" href="#biblio-app-isolation">[APP-ISOLATION]</a> proposed very similar ideas to those that are explored in this
+document. App Isolation proposes that sites opt in to app isolation via a well known manifest URL,
+which is fetched before loading the site. App Isolation argues that two properties, entry point
+restriction and state isolation, can provide the security benefits of using multiple browsers to
+separate sensitive from non-sensitive sites. They implement these properties in Chrome, analyze
+their claims with a formal model, and argue that entry point restriction works well for some types
+of sites (online banking) but not others (social or news sites that rely on deep linking and
+sharing).</p>
+   <h3 class="heading settled" data-level="6.2" id="containers"><span class="secno">6.2. </span><span class="content">Containers and Profiles</span><a class="self-link" href="#containers"></a></h3>
    <p>The Isolate-Me concept is closely related to Firefox Containers and Chrome
 profiles, which allow the user to isolate sites from each other. For example, if the user always
 accesses <code>evil.com</code> in a Dangerous container/profile and <code>very-important-bank.com</code> in a Banking
@@ -1212,7 +1222,7 @@ logged in as a different Google account in each; the Isolate-Me concept is ortho
 use case. Similarly, a user may want to do all their online shopping in a Shopping container so
 that the ads that they get in their Work browsing do not reflect their personal shopping habits.
 This use case is also out of scope for Isolate-Me.</p>
-   <h3 class="heading settled" data-level="6.2" id="site-isolation"><span class="secno">6.2. </span><span class="content">Site Isolation</span><a class="self-link" href="#site-isolation"></a></h3>
+   <h3 class="heading settled" data-level="6.3" id="site-isolation"><span class="secno">6.3. </span><span class="content">Site Isolation</span><a class="self-link" href="#site-isolation"></a></h3>
    <p>Chrome has a large project underway to isolate each site in its own process.
 Much of the site isolation infrastructure is a prerequisite for implementing Isolate-Me. For
 example, if <code>foo.com</code> is an isolated origin and chooses to embed <code>bar.com</code> in a frame, <code>bar.com</code> should run in a separate process. One of the challenges for site isolation is that it would be
@@ -1260,6 +1270,8 @@ too attractive, for fear that all sites will turn it on whether or not they need
   </dl>
   <h3 class="no-num heading settled" id="informative"><span class="content">Informative References</span><a class="self-link" href="#informative"></a></h3>
   <dl>
+   <dt id="biblio-app-isolation"><a class="self-link" href="#biblio-app-isolation"></a>[APP-ISOLATION]
+   <dd>Eric Y. Chen; et al. <a href="http://research.google.com/pubs/pub37198.html">App Isolation: Get the Security of Multiple Browsers with Just One</a>. URL: <a href="http://research.google.com/pubs/pub37198.html">http://research.google.com/pubs/pub37198.html</a>
    <dt id="biblio-foreign-fetch"><a class="self-link" href="#biblio-foreign-fetch"></a>[FOREIGN-FETCH]
    <dd><a href="https://github.com/w3c/ServiceWorker/blob/master/foreign_fetch_explainer.md">Foreign Fetch Explained</a>. URL: <a href="https://github.com/w3c/ServiceWorker/blob/master/foreign_fetch_explainer.md">https://github.com/w3c/ServiceWorker/blob/master/foreign_fetch_explainer.md</a>
    <dt id="biblio-heist"><a class="self-link" href="#biblio-heist"></a>[HEIST]
