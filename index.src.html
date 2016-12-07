@@ -171,6 +171,12 @@ isolated origin, then set the isolated-origin flag on the cookie. When construct
 don't include cookies whose isolated-origin flag is set to an origin that is not the origin of the
 top-level site.
 
+ISSUE: these cookie changes don't prevent all session fixation attacks. If a user has never visited
+victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
+the request when the user first navigates to victim.example.com. The isolated origin can mitigate
+this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
+use __Host- on all cookies.
+
 Algorithms {#algorithms}
 ============
 

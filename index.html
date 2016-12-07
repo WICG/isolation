@@ -1399,7 +1399,7 @@ Parts of this work may be from another specification document.  If so, those par
        <a href="#cookies"><span class="secno">4.1</span> <span class="content">Integration with Cookies</span></a>
        <ol class="toc">
         <li><a href="#forcing-cookies-samesite"><span class="secno">4.1.1</span> <span class="content">Forcing cookies to be same-site</span></a>
-        <li><a href="#double-keyed-storage"><span class="secno">4.1.2</span> <span class="content">Double-keyed storage</span></a>
+        <li><a href="#double-keyed-cookies"><span class="secno">4.1.2</span> <span class="content">Double-keyed storage</span></a>
        </ol>
      </ol>
     <li><a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
@@ -1531,11 +1531,16 @@ origin store</a> adds the given origin to the set.</p>
    <h4 class="heading settled" data-level="4.1.1" id="forcing-cookies-samesite"><span class="secno">4.1.1. </span><span class="content">Forcing cookies to be same-site</span><a class="self-link" href="#forcing-cookies-samesite"></a></h4>
    <p>When receiving a cookie from a request-uri whose origin is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-1">isolated origin</a>, Section 5.3
 should be modified to set the cookie’s <code>samesite-flag</code> field to "Strict" if the request-uri’s <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-1">origin is isolated</a>.</p>
-   <h4 class="heading settled" data-level="4.1.2" id="double-keyed-storage"><span class="secno">4.1.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-storage"></a></h4>
+   <h4 class="heading settled" data-level="4.1.2" id="double-keyed-cookies"><span class="secno">4.1.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-cookies"></a></h4>
    <p class="issue" id="issue-49863578"><a class="self-link" href="#issue-49863578"></a> add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
 isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
 don’t include cookies whose isolated-origin flag is set to an origin that is not the origin of the
 top-level site.</p>
+   <p class="issue" id="issue-d0e2ac33"><a class="self-link" href="#issue-d0e2ac33"></a> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
+victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
+the request when the user first navigates to victim.example.com. The isolated origin can mitigate
+this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
+use </strong>Host- on all cookies.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
    <h2 class="heading settled" data-level="7" id="privacy"><span class="secno">7. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
@@ -1741,6 +1746,11 @@ top-level site.</p>
 isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
 don’t include cookies whose isolated-origin flag is set to an origin that is not the origin of the
 top-level site.<a href="#issue-49863578"> ↵ </a></div>
+   <div class="issue"> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
+victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
+the request when the user first navigates to victim.example.com. The isolated origin can mitigate
+this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
+use </strong>Host- on all cookies.<a href="#issue-d0e2ac33"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
