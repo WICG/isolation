@@ -217,6 +217,16 @@ manipulate the isolated origin via the `window.opener` attribute.
 <a>Initializing a new Document object</a> should be modified to call [[#disown-isolated-opener]] on
 |browsingContext| and the <a>response</a> used to generate the document.
 
+### Removing cross-origin subframe references ### {#remove-cross-origin-subframe-references}
+
+When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
+references to the isolated origin's window via `window.top` or `window.parent`.
+
+ISSUE: Modify
+https://html.spec.whatwg.org/multipage/browsers.html#navigating-nested-browsing-contexts-in-the-dom
+to return null for window.top and window.parent if the context's active Document is an isolated
+origin.
+
 Algorithms {#algorithms}
 ============
 
