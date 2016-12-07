@@ -20,18 +20,23 @@ Introduction {#intro}
 Authors of security-critical applications want the web's low-friction install process, its
 linkability, and its cross-platform nature, but are understandably nervous about hosting very
 powerful applications on the web alongside malicious content that can attack in any number of ways.
-Chrome Apps used to be an attractive choice for building security-critical applications, since
-Chrome Apps are cross-platform (across any desktop platform) and a somewhat lower-friction install
-process than a native app, while offering a greater degree of isolation than a normal web app gets.
-(For example, the browser prevents regular web content from initiating a navigation to a Chrome App
-URL.) However, Chrome Apps are deprecated in favor of the open web, and, indeed, it would be nice
-for security-critical applications to be able to run in any browser with the degree of isolation
-that they desire.
+For example, malicious content can:
 
-This document proposes an isolation mechanism which an origin can opt-into in order to reduce their
-exposure to other web content. Developers responsible for security-critical web applications can
-choose to trade away some of the features of being on the open web (such as full linkability) in
-exchange for better protection from maliciousness.
+- Exploit cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerabilities to steal
+  sensitive user data or take actions on a user's behalf.
+
+- Trick the user into revealing data or taking actions via clickjacking attacks.
+
+- Navigate a security-critical application to a phishing page without the user noticing.
+
+- Leverage a browser vulnerability to gain access to data from other origins (universal XSS or
+  UXSS).
+
+Security-critical applications should be able to run in a browser with a degree of isolation that
+mitigates these attacks. This specification defines an isolation mechanism that an origin can opt in
+to, thereby reducing its exposure to other web content. Developers responsible for security-critical
+web applications can choose to trade away some of the features of being on the open web (such as
+full linkability) in exchange for better protection from malicious web content.
 
 Threat Model {#threat}
 ------------
