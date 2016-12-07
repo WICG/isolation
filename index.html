@@ -1401,8 +1401,17 @@ Parts of this work may be from another specification document.  If so, those par
         <li><a href="#forcing-cookies-samesite"><span class="secno">4.1.1</span> <span class="content">Forcing cookies to be same-site</span></a>
         <li><a href="#double-keyed-cookies"><span class="secno">4.1.2</span> <span class="content">Double-keyed storage</span></a>
        </ol>
+      <li>
+       <a href="#html"><span class="secno">4.2</span> <span class="content">Integration with HTML</span></a>
+       <ol class="toc">
+        <li><a href="#cross-origin-framing"><span class="secno">4.2.1</span> <span class="content">Cross-origin framing of isolated origins</span></a>
+       </ol>
      </ol>
-    <li><a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
+    <li>
+     <a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
+     <ol class="toc">
+      <li><a href="#should-block-navigation-response"><span class="secno">5.1</span> <span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span></a>
+     </ol>
     <li><a href="#security"><span class="secno">6</span> <span class="content">Security Considerations</span></a>
     <li><a href="#privacy"><span class="secno">7</span> <span class="content">Privacy Considerations</span></a>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
@@ -1541,7 +1550,38 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use </strong>Host- on all cookies.</p>
+   <h3 class="heading settled" data-level="4.2" id="html"><span class="secno">4.2. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html"></a></h3>
+   <h4 class="heading settled" data-level="4.2.1" id="cross-origin-framing"><span class="secno">4.2.1. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
+   <p>Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>, so that cross-origin framing of isolated origins is not
+allowed.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
+   <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
+   <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
+algorithm returns "<code>Blocked</code>" if <var>navigation response</var> is from an isolated origin and one or more of
+the ancestors of <var>target</var> is cross-origin.</p>
+   <ol>
+    <li data-md="">
+     <p>If <var>target</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, return "<code>Allowed</code>".</p>
+    <li data-md="">
+     <p>Let <var>navigation origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>.</p>
+    <li data-md="">
+     <p>If <var>navigation origin</var> is not <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-2">an isolated origin</a>, return
+"<code>Allowed</code>".</p>
+    <li data-md="">
+     <p>Let <var>current</var> be <var>target</var>.</p>
+    <li data-md="">
+     <p>While <var>current</var> has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a> (<var>parent</var>):</p>
+     <ol>
+      <li data-md="">
+       <p>Set <var>current</var> to <var>parent</var>.</p>
+      <li data-md="">
+       <p>Let <var>origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>parent</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn">origin</a>.</p>
+      <li data-md="">
+       <p>If <var>origin</var> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>navigation origin</var>, return "<code>Blocked</code>".</p>
+     </ol>
+    <li data-md="">
+     <p>Return "<code>Allowed</code>".</p>
+   </ol>
    <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
    <h2 class="heading settled" data-level="7" id="privacy"><span class="secno">7. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
   </main>
@@ -1706,19 +1746,38 @@ use </strong>Host- on all cookies.</p>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
+    <a data-link-type="biblio">[FETCH]</a> defines the following terms:
+    <ul>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>
+    </ul>
+   <li>
     <a data-link-type="biblio">[HTML]</a> defines the following terms:
     <ul>
      <li><a href="https://html.spec.whatwg.org/multipage/dom.html#document">Document</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#dom-iframe-contentwindow">contentWindow</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-domain">domain</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element">img</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener">opener</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage(message, targetOrigin, transfer)</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization of an origin</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[WHATWG-URL]</a> defines the following terms:
+    <ul>
+     <li><a href="https://url.spec.whatwg.org/#concept-url-parser">url parser</a>
     </ul>
   </ul>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
@@ -1726,10 +1785,14 @@ use </strong>Host- on all cookies.</p>
   <dl>
    <dt id="biblio-cookies">[COOKIES]
    <dd>A. Barth. <a href="https://tools.ietf.org/html/rfc6265">HTTP State Management Mechanism</a>. April 2011. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc6265">https://tools.ietf.org/html/rfc6265</a>
+   <dt id="biblio-fetch">[FETCH]
+   <dd>Anne van Kesteren. <a href="https://fetch.spec.whatwg.org/">Fetch Standard</a>. Living Standard. URL: <a href="https://fetch.spec.whatwg.org/">https://fetch.spec.whatwg.org/</a>
    <dt id="biblio-html">[HTML]
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+   <dt id="biblio-whatwg-url">[WHATWG-URL]
+   <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
@@ -1768,6 +1831,8 @@ use </strong>Host- on all cookies.<a href="#issue-d0e2ac33"> ↵ </a></div>
    <b><a href="#if-an-origin-is-isolated">#if-an-origin-is-isolated</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-if-an-origin-is-isolated-1">4.1.1. Forcing cookies to be same-site</a>
+    <li><a href="#ref-for-if-an-origin-is-isolated-2">5.1. 
+    Should navigation response in target be blocked? </a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */

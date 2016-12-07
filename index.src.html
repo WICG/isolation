@@ -177,8 +177,45 @@ the request when the user first navigates to victim.example.com. The isolated or
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.
 
+Integration with HTML {#html}
+------------
+
+### Cross-origin framing of isolated origins ### {#cross-origin-framing}
+
+Step 1 of <a>Process a navigate response</a> should be modified to call
+[[#should-block-navigation-response]], so that cross-origin framing of isolated origins is not
+allowed.
+
 Algorithms {#algorithms}
 ============
+
+<h3 id="should-block-navigation-response" algorithm>
+    Should |navigation response| in |target| be blocked?
+</h3>
+
+Given a <a>response</a> (|navigation response|) and a <a>browsing context</a> (|target|), this
+algorithm returns "`Blocked`" if |navigation response| is from an isolated origin and one or more of
+the ancestors of |target| is cross-origin.
+
+1. If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
+
+2. Let |navigation origin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
+   serialization of an origin">unicode serialization</a> of |navigation response|'s <a
+   for="response">url</a>.
+
+3. If |navigation origin| is not <a lt="is-origin-isolated">an isolated origin</a>, return
+  "`Allowed`".
+
+4. Let |current| be |target|.
+
+5. While |current| has a <a>parent browsing context</a> (|parent|):
+  1. Set |current| to |parent|.
+  2. Let |origin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
+     serialization of an origin">unicode serialization</a> of |parent|'s <a>active document</a>'s
+     <a>relevant settings object</a>'s <a for="environment settings object">origin</a>.
+  3. If |origin| is not <a>same origin</a> with |navigation origin|, return "`Blocked`".
+
+6. Return "`Allowed`".
 
 Security Considerations {#security}
 ============
