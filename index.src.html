@@ -4,6 +4,7 @@ Status: DREAM
 Shortname: origin-isolation
 Level: None
 Editor: Emily Stark
+Editor: Tanvi Vyas
 Editor: Mike West
 Editor: Joel Weinberger
 Abstract: Isolation: Good feature, or the best feature?
@@ -49,15 +50,15 @@ to address:
     `example.com` window via the <a attribute lt="opener">`window.opener`</a> attribute, which opens
     up communication channels ({{Window/postMessage()}}, frame counting and traversal, etc.) that
     `example.com` might not be expecting.
-    
+
 3.  Likewise, `evil.com` can obtain such a reference via {{Window/open()}}.
 
 4.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
-    `example.com` data and cookies. 
-    
+    `example.com` data and cookies.
+
     Note: The mechanism proposed in this document does not aim to give hard guarantees about
     protection from UXSS, but does hope to mitigate some of the risks on a best-effort basis.
-    
+
 5.  `evil.com` might be able to extract data from `example.com` by loading its resources
     or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
     headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
@@ -68,7 +69,7 @@ to address:
 
 7.  `evil.com` and `example.com` might in fact be `evil.example.com` and `app.example.com`, in which
     case:
-    
+
     1.  `evil.example.com` might try to set a cookie for all of `example.com` in hopes that it can
         fix a session or CSRF token for the user on `app.example.com`, or exploit .
 
@@ -97,7 +98,7 @@ to this mechanism, the user agent will enforce the following:
     `<a target="_blank">...</a>`, etc.), the new window will <a>disown its opener</a>, and the
     call to {{Window/open()}} will return `null`. That is, the user agent will act as though
     <a>noopener</a> is specified on outgoing links and {{Window/open()}} calls.
-    
+
     Likewise, when `example.com` is opened from a cross-origin window, it will <a>disown its
     opener</a>, and the return value of {{Window/open()}} in the opener context will be `null`.
 
@@ -122,3 +123,18 @@ to this mechanism, the user agent will enforce the following:
     Note: This is not a firm guarantee (especially since not all browsers implement per-site process
     isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.
 
+
+Key Concepts {#concepts}
+============
+
+Delivery {#delivery}
+============
+
+Integrations {#integrations}
+============
+
+Security Considerations {#security}
+============
+
+Privacy Considerations {#privacy}
+============
