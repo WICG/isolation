@@ -186,6 +186,17 @@ Step 1 of <a>Process a navigate response</a> should be modified to call
 [[#should-block-navigation-response]], so that cross-origin framing of isolated origins is not
 allowed.
 
+### DOM storage ### {#dom-storage}
+
+ISSUE: Modify localStorage to associate one Storage object per (origin, top level isolated origin)
+pair. In the Storage object initialization steps, check if the top level browsing context's active
+Document's origin is an isolated origin. If so, allocate/return the Storage object associated with
+local storage area for the (origin, top level isolated origin)
+pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
+
+ISSUE: Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
+pair.
+
 Algorithms {#algorithms}
 ============
 

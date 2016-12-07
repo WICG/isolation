@@ -1356,7 +1356,7 @@ Possible extra rowspan handling
      <dt>Version History:
      <dd><a href="https://github.com/mikewest/isolation/commits/master/index.src.html">https://github.com/mikewest/isolation/commits/master/index.src.html</a>
      <dt>Issue Tracking:
-     <dd><a href="https://github.com/mikewest/isolation/issues/">GitHub</a>
+     <dd><a href="https://github.com/wicg/isolation/issues/">GitHub</a>
      <dd><a href="#issues-index">Inline In Spec</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><span class="p-name fn">Emily Stark</span>
@@ -1405,6 +1405,7 @@ Parts of this work may be from another specification document.  If so, those par
        <a href="#html"><span class="secno">4.2</span> <span class="content">Integration with HTML</span></a>
        <ol class="toc">
         <li><a href="#cross-origin-framing"><span class="secno">4.2.1</span> <span class="content">Cross-origin framing of isolated origins</span></a>
+        <li><a href="#dom-storage"><span class="secno">4.2.2</span> <span class="content">DOM storage</span></a>
        </ol>
      </ol>
     <li>
@@ -1554,6 +1555,14 @@ use </strong>Host- on all cookies.</p>
    <h4 class="heading settled" data-level="4.2.1" id="cross-origin-framing"><span class="secno">4.2.1. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
    <p>Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>, so that cross-origin framing of isolated origins is not
 allowed.</p>
+   <h4 class="heading settled" data-level="4.2.2" id="dom-storage"><span class="secno">4.2.2. </span><span class="content">DOM storage</span><a class="self-link" href="#dom-storage"></a></h4>
+   <p class="issue" id="issue-f980d343"><a class="self-link" href="#issue-f980d343"></a> Modify localStorage to associate one Storage object per (origin, top level isolated origin)
+pair. In the Storage object initialization steps, check if the top level browsing context’s active
+Document’s origin is an isolated origin. If so, allocate/return the Storage object associated with
+local storage area for the (origin, top level isolated origin)
+pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)</p>
+   <p class="issue" id="issue-7ea41eca"><a class="self-link" href="#issue-7ea41eca"></a> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
+pair.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
@@ -1814,6 +1823,13 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use </strong>Host- on all cookies.<a href="#issue-d0e2ac33"> ↵ </a></div>
+   <div class="issue"> Modify localStorage to associate one Storage object per (origin, top level isolated origin)
+pair. In the Storage object initialization steps, check if the top level browsing context’s active
+Document’s origin is an isolated origin. If so, allocate/return the Storage object associated with
+local storage area for the (origin, top level isolated origin)
+pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)<a href="#issue-f980d343"> ↵ </a></div>
+   <div class="issue"> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
+pair.<a href="#issue-7ea41eca"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
