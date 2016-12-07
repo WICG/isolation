@@ -1,5 +1,5 @@
 <pre class="metadata">
-Title: Origin Isolated
+Title: Isolated Origins
 Status: DREAM
 Shortname: origin-isolation
 Level: None
@@ -127,10 +127,33 @@ to this mechanism, the user agent will enforce the following:
 Key Concepts {#concepts}
 ============
 
+An <dfn>isolated origin</dfn> is an <a for="/">origin</a> that has opted in to isolate itself from
+other origins on the web, using the mechanisms defined in this specification.
+
+User agents have an <dfn>isolated origin store</dfn>, which is a set of <a for="/">origins</a> that
+wish to be isolated.
+
+When asked <dfn algorithm local-lt="is-origin-isolated">if an origin is isolated</dfn>, an
+<a>isolated origin store</a> returns true if the given origin is present in the set and false
+otherwise.
+
+When asked to <dfn algorithm local-lt="isolate-an-origin">isolate an origin</dfn>, an <a>isolated
+origin store</a> adds the given origin to the set.
+
+When asked to <dfn algorithm local-lt="deisolate-an-origin">de-isolate an origin</dfn>, an
+<a>isolated origin store</a> removes the given origin from the set.
+
 Delivery {#delivery}
 ============
 
+ISSUE: define an HTTP header that calls isolate-an-origin or deisolate-an-origin
+
+ISSUE: the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...
+
 Integrations {#integrations}
+============
+
+Algorithms {#algorithms}
 ============
 
 Security Considerations {#security}
