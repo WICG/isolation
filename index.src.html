@@ -14,6 +14,12 @@ Version History: https://github.com/mikewest/isolation/commits/master/index.src.
 Markup Shorthands: css off, markdown on
 </pre>
 
+<pre class="anchors">
+spec: HTML; urlPrefix: https://html.spec.whatwg.org/
+  type: dfn
+    text: initialising a new document object; url: initialise-the-document-object
+</pre>
+
 Introduction {#intro}
 ============
 
@@ -151,7 +157,8 @@ When asked to <dfn algorithm local-lt="deisolate-an-origin">de-isolate an origin
 Delivery {#delivery}
 ============
 
-ISSUE: define an HTTP header that calls isolate-an-origin or deisolate-an-origin
+ISSUE: define an HTTP header that is processed in Fetch and calls isolate-an-origin or
+deisolate-an-origin
 
 ISSUE: the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...
 
@@ -202,6 +209,14 @@ pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
 ISSUE: Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
 pair.
 
+### Disowning isolated openers ### {#disown-opener}
+
+When an isolated origin opens a new window to a different origin, that origin should not be able to
+manipulate the isolated origin via the `window.opener` attribute.
+
+<a>Initializing a new Document object</a> should be modified to call [[#disown-isolated-opener]] on
+|browsingContext| and the <a>response</a> used to generate the document.
+
 Algorithms {#algorithms}
 ============
 
@@ -217,7 +232,7 @@ the ancestors of |target| is cross-origin.
 
 2. Let |navigation origin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
    serialization of an origin">unicode serialization</a> of |navigation response|'s <a
-   for="response">url</a>.
+   for="response">url</a>'s {{URL/origin}}.
 
 3. If |navigation origin| is not <a lt="is-origin-isolated">an isolated origin</a>, return
   "`Allowed`".
@@ -232,6 +247,30 @@ the ancestors of |target| is cross-origin.
   3. If |origin| is not <a>same origin</a> with |navigation origin|, return "`Blocked`".
 
 6. Return "`Allowed`".
+
+<h3 id="disown-isolated-opener" algorithm>
+    Disown an isolated opener
+</h3>
+
+Given a <a>browsing context</a> (|browsingContext|) and a <a>response</a> (|response|) used to
+generate a <a>document</a>, this algorithm disowns |browsingContext|'s opener if the opener is an
+isolated origin.
+
+1. If |browsingContext| does not have an <a>opener browsing context</a>, then abort these steps.
+
+2. Let |openedOrigin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
+   serialization of an origin">unicode serialization</a> of |response|'s <a for="response">url</a>'s
+   {{URL/origin}}.
+
+3. Let |openerOrigin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
+   serialization of an origin">unicode serialization</a> of |browsingContext|'s <a>opener browsing
+   context</a>'s <a>active document</a>'s <a>relevant settings object</a>'s
+   <a for="environment settings object">origin</a>.
+
+4. If |openedOrigin| is <a>same origin</a> with |openerOrigin|, then abort these steps.
+
+5. If |openerOrigin| <a lt="is-origin-isolated">is an isolated origin</a>, then |browsingContext|
+   should <a>disown its opener</a>.
 
 Security Considerations {#security}
 ============

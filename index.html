@@ -1421,12 +1421,14 @@ Parts of this work may be from another specification document.  If so, those par
        <ol class="toc">
         <li><a href="#cross-origin-framing"><span class="secno">4.2.1</span> <span class="content">Cross-origin framing of isolated origins</span></a>
         <li><a href="#dom-storage"><span class="secno">4.2.2</span> <span class="content">DOM storage</span></a>
+        <li><a href="#disown-opener"><span class="secno">4.2.3</span> <span class="content">Disowning isolated openers</span></a>
        </ol>
      </ol>
     <li>
      <a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
      <ol class="toc">
       <li><a href="#should-block-navigation-response"><span class="secno">5.1</span> <span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span></a>
+      <li><a href="#disown-isolated-opener"><span class="secno">5.2</span> <span class="content"> Disown an isolated opener </span></a>
      </ol>
     <li><a href="#security"><span class="secno">6</span> <span class="content">Security Considerations</span></a>
     <li><a href="#privacy"><span class="secno">7</span> <span class="content">Privacy Considerations</span></a>
@@ -1555,7 +1557,8 @@ otherwise.</p>
 origin store</a> adds the given origin to the set.</p>
    <p>When asked to <dfn class="algorithm" data-algorithm="de-isolate an origin" data-dfn-type="dfn" data-local-lt="deisolate-an-origin" data-noexport="" id="de-isolate-an-origin">de-isolate an origin<a class="self-link" href="#de-isolate-an-origin"></a></dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-3">isolated origin store</a> removes the given origin from the set.</p>
    <h2 class="heading settled" data-level="3" id="delivery"><span class="secno">3. </span><span class="content">Delivery</span><a class="self-link" href="#delivery"></a></h2>
-   <p class="issue" id="issue-4ca5597d"><a class="self-link" href="#issue-4ca5597d"></a> define an HTTP header that calls isolate-an-origin or deisolate-an-origin</p>
+   <p class="issue" id="issue-c08cb260"><a class="self-link" href="#issue-c08cb260"></a> define an HTTP header that is processed in Fetch and calls isolate-an-origin or
+deisolate-an-origin</p>
    <p class="issue" id="issue-9e404d85"><a class="self-link" href="#issue-9e404d85"></a> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...</p>
    <h2 class="heading settled" data-level="4" id="integrations"><span class="secno">4. </span><span class="content">Integrations</span><a class="self-link" href="#integrations"></a></h2>
    <h3 class="heading settled" data-level="4.1" id="cookies"><span class="secno">4.1. </span><span class="content">Integration with Cookies</span><a class="self-link" href="#cookies"></a></h3>
@@ -1585,6 +1588,10 @@ local storage area for the (origin, top level isolated origin)
 pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)</p>
    <p class="issue" id="issue-7ea41eca"><a class="self-link" href="#issue-7ea41eca"></a> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
 pair.</p>
+   <h4 class="heading settled" data-level="4.2.3" id="disown-opener"><span class="secno">4.2.3. </span><span class="content">Disowning isolated openers</span><a class="self-link" href="#disown-opener"></a></h4>
+   <p>When an isolated origin opens a new window to a different origin, that origin should not be able to
+manipulate the isolated origin via the <code>window.opener</code> attribute.</p>
+   <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#initialise-the-document-object">Initializing a new Document object</a> should be modified to call <a href="#disown-isolated-opener">§5.2 Disown an isolated opener</a> on <var>browsingContext</var> and the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> used to generate the document.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
@@ -1594,7 +1601,7 @@ the ancestors of <var>target</var> is cross-origin.</p>
     <li data-md="">
      <p>If <var>target</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, return "<code>Allowed</code>".</p>
     <li data-md="">
-     <p>Let <var>navigation origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>.</p>
+     <p>Let <var>navigation origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-origin">origin</a></code>.</p>
     <li data-md="">
      <p>If <var>navigation origin</var> is not <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-2">an isolated origin</a>, return
 "<code>Allowed</code>".</p>
@@ -1612,6 +1619,23 @@ the ancestors of <var>target</var> is cross-origin.</p>
      </ol>
     <li data-md="">
      <p>Return "<code>Allowed</code>".</p>
+   </ol>
+   <h3 class="heading settled algorithm" data-algorithm="Disown an isolated opener" data-level="5.2" id="disown-isolated-opener"><span class="secno">5.2. </span><span class="content"> Disown an isolated opener </span><a class="self-link" href="#disown-isolated-opener"></a></h3>
+   <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>browsingContext</var>) and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>) used to
+generate a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">document</a>, this algorithm disowns <var>browsingContext</var>’s opener if the opener is an
+isolated origin.</p>
+   <ol>
+    <li data-md="">
+     <p>If <var>browsingContext</var> does not have an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>, then abort these steps.</p>
+    <li data-md="">
+     <p>Let <var>openedOrigin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-origin">origin</a></code>.</p>
+    <li data-md="">
+     <p>Let <var>openerOrigin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>browsingContext</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing
+ context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin</a>.</p>
+    <li data-md="">
+     <p>If <var>openedOrigin</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>openerOrigin</var>, then abort these steps.</p>
+    <li data-md="">
+     <p>If <var>openerOrigin</var> <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-3">is an isolated origin</a>, then <var>browsingContext</var> should <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>.</p>
    </ol>
    <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
    <h2 class="heading settled" data-level="7" id="privacy"><span class="secno">7. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
@@ -1777,6 +1801,11 @@ the ancestors of <var>target</var> is cross-origin.</p>
   <h3 class="no-num no-ref heading settled" id="index-defined-elsewhere"><span class="content">Terms defined by reference</span><a class="self-link" href="#index-defined-elsewhere"></a></h3>
   <ul class="index">
    <li>
+    <a data-link-type="biblio">[WHATWG-DOM]</a> defines the following terms:
+    <ul>
+     <li><a href="https://dom.spec.whatwg.org/#concept-document">document</a>
+    </ul>
+   <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
@@ -1794,9 +1823,11 @@ the ancestors of <var>target</var> is cross-origin.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-domain">domain</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element">img</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#initialise-the-document-object">initializing a new document object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener">opener</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin <small>(for environment settings object)</small></a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>
@@ -1809,6 +1840,7 @@ the ancestors of <var>target</var> is cross-origin.</p>
    <li>
     <a data-link-type="biblio">[WHATWG-URL]</a> defines the following terms:
     <ul>
+     <li><a href="https://url.spec.whatwg.org/#dom-url-origin">origin</a>
      <li><a href="https://url.spec.whatwg.org/#concept-url-parser">url parser</a>
     </ul>
   </ul>
@@ -1823,6 +1855,8 @@ the ancestors of <var>target</var> is cross-origin.</p>
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+   <dt id="biblio-whatwg-dom">[WHATWG-DOM]
+   <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-whatwg-url">[WHATWG-URL]
    <dd>Anne van Kesteren. <a href="https://url.spec.whatwg.org/">URL Standard</a>. Living Standard. URL: <a href="https://url.spec.whatwg.org/">https://url.spec.whatwg.org/</a>
   </dl>
@@ -1835,7 +1869,8 @@ the ancestors of <var>target</var> is cross-origin.</p>
    <div class="issue"> Should we allow subresource requests from <code>evil.com</code> to <code>example.com</code> at all? If not,
   easy: network error. If so, we need to either double-key <code>example.com</code>'s cookies, or ensure
   that they’re all treated as <code>SameSite=Strict</code>.<a href="#issue-4e54a417"> ↵ </a></div>
-   <div class="issue"> define an HTTP header that calls isolate-an-origin or deisolate-an-origin<a href="#issue-4ca5597d"> ↵ </a></div>
+   <div class="issue"> define an HTTP header that is processed in Fetch and calls isolate-an-origin or
+deisolate-an-origin<a href="#issue-c08cb260"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>
    <div class="issue"> add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
 isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
@@ -1872,6 +1907,8 @@ pair.<a href="#issue-7ea41eca"> ↵ </a></div>
     <li><a href="#ref-for-if-an-origin-is-isolated-1">4.1.1. Forcing cookies to be same-site</a>
     <li><a href="#ref-for-if-an-origin-is-isolated-2">5.1. 
     Should navigation response in target be blocked? </a>
+    <li><a href="#ref-for-if-an-origin-is-isolated-3">5.2. 
+    Disown an isolated opener </a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
