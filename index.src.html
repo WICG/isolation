@@ -153,6 +153,24 @@ ISSUE: the isolate-me HTTP header needs to be sent and/or processed before the S
 Integrations {#integrations}
 ============
 
+Integration with Cookies {#cookies}
+------------
+
+This section defines modifications to [[!COOKIES]] to support isolated origins.
+
+### Forcing cookies to be same-site ### {#forcing-cookies-samesite}
+
+When receiving a cookie from a request-uri whose origin is an <a>isolated origin</a>, Section 5.3
+should be modified to set the cookie's `samesite-flag` field to "Strict" if the request-uri's <a
+lt="is-origin-isolated">origin is isolated</a>.
+
+### Double-keyed storage ### {#double-keyed-cookies}
+
+ISSUE: add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
+isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
+don't include cookies whose isolated-origin flag is set to an origin that is not the origin of the
+top-level site.
+
 Algorithms {#algorithms}
 ============
 

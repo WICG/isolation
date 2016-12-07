@@ -1392,7 +1392,16 @@ Parts of this work may be from another specification document.  If so, those par
      </ol>
     <li><a href="#concepts"><span class="secno">2</span> <span class="content">Key Concepts</span></a>
     <li><a href="#delivery"><span class="secno">3</span> <span class="content">Delivery</span></a>
-    <li><a href="#integrations"><span class="secno">4</span> <span class="content">Integrations</span></a>
+    <li>
+     <a href="#integrations"><span class="secno">4</span> <span class="content">Integrations</span></a>
+     <ol class="toc">
+      <li>
+       <a href="#cookies"><span class="secno">4.1</span> <span class="content">Integration with Cookies</span></a>
+       <ol class="toc">
+        <li><a href="#forcing-cookies-samesite"><span class="secno">4.1.1</span> <span class="content">Forcing cookies to be same-site</span></a>
+        <li><a href="#double-keyed-storage"><span class="secno">4.1.2</span> <span class="content">Double-keyed storage</span></a>
+       </ol>
+     </ol>
     <li><a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
     <li><a href="#security"><span class="secno">6</span> <span class="content">Security Considerations</span></a>
     <li><a href="#privacy"><span class="secno">7</span> <span class="content">Privacy Considerations</span></a>
@@ -1504,11 +1513,11 @@ to this mechanism, the user agent will enforce the following:</p>
   isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.</p>
    </ol>
    <h2 class="heading settled" data-level="2" id="concepts"><span class="secno">2. </span><span class="content">Key Concepts</span><a class="self-link" href="#concepts"></a></h2>
-   <p>An <dfn data-dfn-type="dfn" data-noexport="" id="isolated-origin">isolated origin<a class="self-link" href="#isolated-origin"></a></dfn> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> that has opted in to isolate itself from
+   <p>An <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="isolated-origin">isolated origin</dfn> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> that has opted in to isolate itself from
 other origins on the web, using the mechanisms defined in this specification.</p>
    <p>User agents have an <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="isolated-origin-store">isolated origin store</dfn>, which is a set of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origins</a> that
 wish to be isolated.</p>
-   <p>When asked <dfn class="algorithm" data-algorithm="if an origin is isolated" data-dfn-type="dfn" data-local-lt="is-origin-isolated" data-noexport="" id="if-an-origin-is-isolated">if an origin is isolated<a class="self-link" href="#if-an-origin-is-isolated"></a></dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-1">isolated origin store</a> returns true if the given origin is present in the set and false
+   <p>When asked <dfn class="dfn-paneled algorithm" data-algorithm="if an origin is isolated" data-dfn-type="dfn" data-local-lt="is-origin-isolated" data-noexport="" id="if-an-origin-is-isolated">if an origin is isolated</dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-1">isolated origin store</a> returns true if the given origin is present in the set and false
 otherwise.</p>
    <p>When asked to <dfn class="algorithm" data-algorithm="isolate an origin" data-dfn-type="dfn" data-local-lt="isolate-an-origin" data-noexport="" id="isolate-an-origin">isolate an origin<a class="self-link" href="#isolate-an-origin"></a></dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-2">isolated
 origin store</a> adds the given origin to the set.</p>
@@ -1517,6 +1526,16 @@ origin store</a> adds the given origin to the set.</p>
    <p class="issue" id="issue-4ca5597d"><a class="self-link" href="#issue-4ca5597d"></a> define an HTTP header that calls isolate-an-origin or deisolate-an-origin</p>
    <p class="issue" id="issue-9e404d85"><a class="self-link" href="#issue-9e404d85"></a> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...</p>
    <h2 class="heading settled" data-level="4" id="integrations"><span class="secno">4. </span><span class="content">Integrations</span><a class="self-link" href="#integrations"></a></h2>
+   <h3 class="heading settled" data-level="4.1" id="cookies"><span class="secno">4.1. </span><span class="content">Integration with Cookies</span><a class="self-link" href="#cookies"></a></h3>
+   <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support isolated origins.</p>
+   <h4 class="heading settled" data-level="4.1.1" id="forcing-cookies-samesite"><span class="secno">4.1.1. </span><span class="content">Forcing cookies to be same-site</span><a class="self-link" href="#forcing-cookies-samesite"></a></h4>
+   <p>When receiving a cookie from a request-uri whose origin is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-1">isolated origin</a>, Section 5.3
+should be modified to set the cookie’s <code>samesite-flag</code> field to "Strict" if the request-uri’s <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-1">origin is isolated</a>.</p>
+   <h4 class="heading settled" data-level="4.1.2" id="double-keyed-storage"><span class="secno">4.1.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-storage"></a></h4>
+   <p class="issue" id="issue-49863578"><a class="self-link" href="#issue-49863578"></a> add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
+isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
+don’t include cookies whose isolated-origin flag is set to an origin that is not the origin of the
+top-level site.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
    <h2 class="heading settled" data-level="7" id="privacy"><span class="secno">7. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
@@ -1700,6 +1719,8 @@ origin store</a> adds the given origin to the set.</p>
   <h2 class="no-num no-ref heading settled" id="references"><span class="content">References</span><a class="self-link" href="#references"></a></h2>
   <h3 class="no-num no-ref heading settled" id="normative"><span class="content">Normative References</span><a class="self-link" href="#normative"></a></h3>
   <dl>
+   <dt id="biblio-cookies">[COOKIES]
+   <dd>A. Barth. <a href="https://tools.ietf.org/html/rfc6265">HTTP State Management Mechanism</a>. April 2011. Proposed Standard. URL: <a href="https://tools.ietf.org/html/rfc6265">https://tools.ietf.org/html/rfc6265</a>
    <dt id="biblio-html">[HTML]
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
@@ -1716,11 +1737,27 @@ origin store</a> adds the given origin to the set.</p>
   that they’re all treated as <code>SameSite=Strict</code>.<a href="#issue-4e54a417"> ↵ </a></div>
    <div class="issue"> define an HTTP header that calls isolate-an-origin or deisolate-an-origin<a href="#issue-4ca5597d"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>
+   <div class="issue"> add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
+isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
+don’t include cookies whose isolated-origin flag is set to an origin that is not the origin of the
+top-level site.<a href="#issue-49863578"> ↵ </a></div>
   </div>
+  <aside class="dfn-panel" data-for="isolated-origin">
+   <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-isolated-origin-1">4.1.1. Forcing cookies to be same-site</a>
+   </ul>
+  </aside>
   <aside class="dfn-panel" data-for="isolated-origin-store">
    <b><a href="#isolated-origin-store">#isolated-origin-store</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-isolated-origin-store-1">2. Key Concepts</a> <a href="#ref-for-isolated-origin-store-2">(2)</a> <a href="#ref-for-isolated-origin-store-3">(3)</a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="if-an-origin-is-isolated">
+   <b><a href="#if-an-origin-is-isolated">#if-an-origin-is-isolated</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-if-an-origin-is-isolated-1">4.1.1. Forcing cookies to be same-site</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
