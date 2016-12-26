@@ -222,10 +222,13 @@ manipulate the isolated origin via the `window.opener` attribute.
 When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
 references to the isolated origin's window via `window.top` or `window.parent`.
 
-ISSUE: Modify
-https://html.spec.whatwg.org/multipage/browsers.html#navigating-nested-browsing-contexts-in-the-dom
-to return null for window.top and window.parent if the context's active Document is an isolated
-origin.
+The <a attribute lt="top" for="/">`window.top`</a> attribute algorithm should be modified to return
+null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
+<a for="Document">origin</a> is an <a>isolated origin</a>.
+
+Similarly, the <a attribute lt="parent" for="/">`window.parent`</a> attribute algorithm should be
+modified to return null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
+<a for="Document">origin</a> is an <a>isolated origin</a>.
 
 Algorithms {#algorithms}
 ============

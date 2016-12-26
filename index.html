@@ -414,19 +414,6 @@
 	 border-left: 0.5em solid #DEF;
 	}
 
-	/* Put nice boxes around each algorithm. */
-	[data-algorithm]:not(.heading) {
-	  padding: .5em;
-	  border: thin solid #ddd; border-radius: .5em;
-	  margin: .5em 0;
-	}
-	[data-algorithm]:not(.heading) > :first-child {
-	  margin-top: 0;
-	}
-	[data-algorithm]:not(.heading) > :last-child {
-	  margin-bottom: 0;
-	}
-
 	/* Style for switch/case <dl>s */
 	dl.switch > dd > ol.only,
 	dl.switch > dd > .only > ol {
@@ -968,8 +955,6 @@ Possible extra rowspan handling
 		/* Reverse color scheme */
 		color: black;
 		border-color: #3980B5;
-		border-bottom-width: 3px !important;
-		margin-bottom: 0px !important;
 	}
 	.toc a:visited {
 		border-color: #054572;
@@ -1176,7 +1161,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 0feafaae1a97b66d9da46b325858f9805ac01fb2" name="generator">
+  <meta content="Bikeshed 1.0.0" name="generator">
 <style>/* style-md-lists */
 
             /* This is a weird hack for me not yet following the commonmark spec
@@ -1365,7 +1350,7 @@ Possible extra rowspan handling
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Isolated Origins</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-12-07">7 December 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-12-26">26 December 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Version History:
@@ -1385,7 +1370,7 @@ Possible extra rowspan handling
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 7 December 2016,
+In addition, as of 26 December 2016,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1572,11 +1557,11 @@ should be modified to set the cookie’s <code>samesite-flag</code> field to "St
 isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
 don’t include cookies whose isolated-origin flag is set to an origin that is not the origin of the
 top-level site.</p>
-   <p class="issue" id="issue-cad8c46e"><a class="self-link" href="#issue-cad8c46e"></a> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
+   <p class="issue" id="issue-d0e2ac33"><a class="self-link" href="#issue-d0e2ac33"></a> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
-this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
-use __Host- on all cookies.</p>
+this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
+use </strong>Host- on all cookies.</p>
    <h3 class="heading settled" data-level="4.2" id="html"><span class="secno">4.2. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="cross-origin-framing"><span class="secno">4.2.1. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
    <p>Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>, so that cross-origin framing of isolated origins is not
@@ -1596,10 +1581,10 @@ manipulate the isolated origin via the <code>window.opener</code> attribute.</p>
    <h4 class="heading settled" data-level="4.2.4" id="remove-cross-origin-subframe-references"><span class="secno">4.2.4. </span><span class="content">Removing cross-origin subframe references</span><a class="self-link" href="#remove-cross-origin-subframe-references"></a></h4>
    <p>When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
 references to the isolated origin’s window via <code>window.top</code> or <code>window.parent</code>.</p>
-   <p class="issue" id="issue-48a56d98"><a class="self-link" href="#issue-48a56d98"></a> Modify
-https://html.spec.whatwg.org/multipage/browsers.html#navigating-nested-browsing-contexts-in-the-dom
-to return null for window.top and window.parent if the context’s active Document is an isolated
-origin.</p>
+   <p>The <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-top"><code>window.top</code></a> attribute algorithm should be modified to return
+null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-2">isolated origin</a>.</p>
+   <p>Similarly, the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-parent"><code>window.parent</code></a> attribute algorithm should be
+modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a>.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
@@ -1621,7 +1606,7 @@ the ancestors of <var>target</var> is cross-origin.</p>
       <li data-md="">
        <p>Set <var>current</var> to <var>parent</var>.</p>
       <li data-md="">
-       <p>Let <var>origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>parent</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin</a>.</p>
+       <p>Let <var>origin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>parent</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn">origin</a>.</p>
       <li data-md="">
        <p>If <var>origin</var> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>navigation origin</var>, return "<code>Blocked</code>".</p>
      </ol>
@@ -1639,7 +1624,7 @@ isolated origin.</p>
      <p>Let <var>openedOrigin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <code class="idl"><a data-link-type="idl" href="https://url.spec.whatwg.org/#dom-url-origin">origin</a></code>.</p>
     <li data-md="">
      <p>Let <var>openerOrigin</var> be the result of executing the <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-parser">URL parser</a> on the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization</a> of <var>browsingContext</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing
- context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin</a>.</p>
+ context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn">origin</a>.</p>
     <li data-md="">
      <p>If <var>openedOrigin</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>openerOrigin</var>, then abort these steps.</p>
     <li data-md="">
@@ -1812,6 +1797,7 @@ isolated origin.</p>
     <a data-link-type="biblio">[WHATWG-DOM]</a> defines the following terms:
     <ul>
      <li><a href="https://dom.spec.whatwg.org/#concept-document">document</a>
+     <li><a href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a>
     </ul>
    <li>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
@@ -1837,12 +1823,14 @@ isolated origin.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener">opener</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a>
-     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin <small>(for environment settings object)</small></a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-parent">parent</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#parent-browsing-context">parent browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage(message, targetOrigin, transfer)</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-top">top</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization of an origin</a>
     </ul>
    <li>
@@ -1887,8 +1875,8 @@ top-level site.<a href="#issue-49863578"> ↵ </a></div>
    <div class="issue"> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
-this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
-use __Host- on all cookies.<a href="#issue-cad8c46e"> ↵ </a></div>
+this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
+use </strong>Host- on all cookies.<a href="#issue-d0e2ac33"> ↵ </a></div>
    <div class="issue"> Modify localStorage to associate one Storage object per (origin, top level isolated origin)
 pair. In the Storage object initialization steps, check if the top level browsing context’s active
 Document’s origin is an isolated origin. If so, allocate/return the Storage object associated with
@@ -1896,15 +1884,12 @@ local storage area for the (origin, top level isolated origin)
 pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)<a href="#issue-f980d343"> ↵ </a></div>
    <div class="issue"> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
 pair.<a href="#issue-7ea41eca"> ↵ </a></div>
-   <div class="issue"> Modify
-https://html.spec.whatwg.org/multipage/browsers.html#navigating-nested-browsing-contexts-in-the-dom
-to return null for window.top and window.parent if the context’s active Document is an isolated
-origin.<a href="#issue-48a56d98"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-isolated-origin-1">4.1.1. Forcing cookies to be same-site</a>
+    <li><a href="#ref-for-isolated-origin-2">4.2.4. Removing cross-origin subframe references</a> <a href="#ref-for-isolated-origin-3">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="isolated-origin-store">
