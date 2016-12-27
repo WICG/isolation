@@ -18,6 +18,8 @@ Markup Shorthands: css off, markdown on
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     text: initialising a new document object; url: initialise-the-document-object
+    text: storage object initialisation steps; url: storage-object-initialisation-steps
+    text: Storage; url: storage-2
 </pre>
 
 Introduction {#intro}
@@ -200,11 +202,24 @@ allowed.
 
 ### DOM storage ### {#dom-storage}
 
-ISSUE: Modify localStorage to associate one Storage object per (origin, top level isolated origin)
-pair. In the Storage object initialization steps, check if the top level browsing context's active
-Document's origin is an isolated origin. If so, allocate/return the Storage object associated with
-local storage area for the (origin, top level isolated origin)
-pair. (https://html.spec.whatwg.org/multipage/webstorage.html#dom-localstorage)
+When an origin becomes isolated, it should use its own DOM storage separate from what it used before
+being isolated.
+
+#### `localStorage` #### {#localstorage}
+
+Instead of providing a <a>Storage</a> object for each <a for="/">origin</a>, the `localStorage`
+object should provide two <a>Storage</a> objects, one for isolated origins and one for non-isolated
+origins. Step 3 of
+<a lt="storage object initialisation steps">the `Storage` object initialization steps</a> for
+`localStorage` should be modified to read as follows:
+
+3. Check to see if the user agent has allocated a local storage area for the `(origin, isolated)`
+   pair, where `origin` is the <a for="/">origin</a> of the <a>Document</a> of the <a>Window</a>
+   object on which the attribute was accessed, and `isolated` is a boolean flag that is true if the
+   <a for="/">origin</a> is an <a>isolated origin</a> and false otherwise. If it has not, create a
+   new storage area for that `(origin, isolated)` pair.
+
+#### `sessionStorage` #### {#sessionstorage}
 
 ISSUE: Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
 pair.
