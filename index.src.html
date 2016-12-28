@@ -221,8 +221,18 @@ origins. Step 3 of
 
 #### `sessionStorage` #### {#sessionstorage}
 
-ISSUE: Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
-pair.
+{{sessionStorage}} should be modified as follows. Each <a>top-level browsing context</a> should have
+a unique set of session storage areas, one for each `(origin, isolated)` pair, where `isolated` is a
+boolean flag that is true if the <a for="/">`origin`</a> is an <a>isolated origin</a> and false
+otherwise.
+
+When a new <a>Document</a> is created in a <a>browsing context</a> which has a <a>top-level browsing
+context</a>, the user agent must check to see if that <a>top-level browsing context</a> has a
+session storage area for the pair `(origin, isolated)`, where `origin` is the
+document's <a for="/">origin</a> and `isolated` is true if `origin` is an <a>isolated origin</a> and
+false otherwise. If it does, then that is the <a>Document</a>'s assigned session storage area. If it
+does not, a new storage area for that document's <a>origin</a> must be created, and then <i>that</i>
+is the <a>Document</a>'s assigned session storage area.
 
 ### Disowning isolated openers ### {#disown-opener}
 

@@ -1350,7 +1350,7 @@ Possible extra rowspan handling
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Isolated Origins</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-12-27">27 December 2016</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2016-12-28">28 December 2016</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Version History:
@@ -1370,7 +1370,7 @@ Possible extra rowspan handling
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 27 December 2016,
+In addition, as of 28 December 2016,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1583,8 +1583,16 @@ origins. Step 3 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/#s
  new storage area for that <code>(origin, isolated)</code> pair.</p>
    </ol>
    <h5 class="heading settled" data-level="4.2.2.2" id="sessionstorage"><span class="secno">4.2.2.2. </span><span class="content"><code>sessionStorage</code></span><a class="self-link" href="#sessionstorage"></a></h5>
-   <p class="issue" id="issue-7ea41eca"><a class="self-link" href="#issue-7ea41eca"></a> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
-pair.</p>
+   <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webstorage.html#dom-sessionstorage">sessionStorage</a></code> should be modified as follows. Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a> should have
+a unique set of session storage areas, one for each <code>(origin, isolated)</code> pair, where <code>isolated</code> is a
+boolean flag that is true if the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin"><code>origin</code></a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a> and false
+otherwise.</p>
+   <p>When a new <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">Document</a> is created in a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> which has a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing
+context</a>, the user agent must check to see if that <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a> has a
+session storage area for the pair <code>(origin, isolated)</code>, where <code>origin</code> is the
+document’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> and <code>isolated</code> is true if <code>origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a> and
+false otherwise. If it does, then that is the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">Document</a>’s assigned session storage area. If it
+does not, a new storage area for that document’s <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#service-worker-client-origin">origin</a> must be created, and then <i>that</i> is the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">Document</a>’s assigned session storage area.</p>
    <h4 class="heading settled" data-level="4.2.3" id="disown-opener"><span class="secno">4.2.3. </span><span class="content">Disowning isolated openers</span><a class="self-link" href="#disown-opener"></a></h4>
    <p>When an isolated origin opens a new window to a different origin, that origin should not be able to
 manipulate the isolated origin via the <code>window.opener</code> attribute.</p>
@@ -1593,9 +1601,9 @@ manipulate the isolated origin via the <code>window.opener</code> attribute.</p>
    <p>When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
 references to the isolated origin’s window via <code>window.top</code> or <code>window.parent</code>.</p>
    <p>The <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-top"><code>window.top</code></a> attribute algorithm should be modified to return
-null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a>.</p>
+null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-5">isolated origin</a>.</p>
    <p>Similarly, the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-parent"><code>window.parent</code></a> attribute algorithm should be
-modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a>.</p>
+modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-6">isolated origin</a>.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
    <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
@@ -1847,9 +1855,15 @@ isolated origin.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">process a navigate response</a>
      <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webstorage.html#dom-sessionstorage">sessionStorage</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-top">top</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization of an origin</a>
+    </ul>
+   <li>
+    <a data-link-type="biblio">[service-workers-1]</a> defines the following terms:
+    <ul>
+     <li><a href="https://w3c.github.io/ServiceWorker/#service-worker-client-origin">origin</a>
     </ul>
    <li>
     <a data-link-type="biblio">[WHATWG-URL]</a> defines the following terms:
@@ -1869,6 +1883,8 @@ isolated origin.</p>
    <dd>Anne van Kesteren; et al. <a href="https://html.spec.whatwg.org/multipage/">HTML Standard</a>. Living Standard. URL: <a href="https://html.spec.whatwg.org/multipage/">https://html.spec.whatwg.org/multipage/</a>
    <dt id="biblio-rfc2119">[RFC2119]
    <dd>S. Bradner. <a href="https://tools.ietf.org/html/rfc2119">Key words for use in RFCs to Indicate Requirement Levels</a>. March 1997. Best Current Practice. URL: <a href="https://tools.ietf.org/html/rfc2119">https://tools.ietf.org/html/rfc2119</a>
+   <dt id="biblio-service-workers-1">[SERVICE-WORKERS-1]
+   <dd>Alex Russell; et al. <a href="https://w3c.github.io/ServiceWorker/">Service Workers 1</a>. 11 October 2016. WD. URL: <a href="https://w3c.github.io/ServiceWorker/">https://w3c.github.io/ServiceWorker/</a>
    <dt id="biblio-whatwg-dom">[WHATWG-DOM]
    <dd>Anne van Kesteren. <a href="https://dom.spec.whatwg.org/">DOM Standard</a>. Living Standard. URL: <a href="https://dom.spec.whatwg.org/">https://dom.spec.whatwg.org/</a>
    <dt id="biblio-whatwg-url">[WHATWG-URL]
@@ -1895,15 +1911,14 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using <strong>Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use </strong>Host- on all cookies.<a href="#issue-d0e2ac33"> ↵ </a></div>
-   <div class="issue"> Modify sessionStorage to associate one Storage object per (origin, top level isolated origin)
-pair.<a href="#issue-7ea41eca"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-isolated-origin-1">4.1.1. Forcing cookies to be same-site</a>
     <li><a href="#ref-for-isolated-origin-2">4.2.2.1. localStorage</a>
-    <li><a href="#ref-for-isolated-origin-3">4.2.4. Removing cross-origin subframe references</a> <a href="#ref-for-isolated-origin-4">(2)</a>
+    <li><a href="#ref-for-isolated-origin-3">4.2.2.2. sessionStorage</a> <a href="#ref-for-isolated-origin-4">(2)</a>
+    <li><a href="#ref-for-isolated-origin-5">4.2.4. Removing cross-origin subframe references</a> <a href="#ref-for-isolated-origin-6">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="isolated-origin-store">
