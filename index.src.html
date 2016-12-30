@@ -180,10 +180,32 @@ lt="is-origin-isolated">origin is isolated</a>.
 
 ### Double-keyed storage ### {#double-keyed-cookies}
 
-ISSUE: add an isolated-origin flag to cookies. When a cookie is set and the top-level site is an
-isolated origin, then set the isolated-origin flag on the cookie. When constructing a Cookie header,
-don't include cookies whose isolated-origin flag is set to an origin that is not the origin of the
-top-level site.
+When a cookie is set on a request for which the top-level document is an <a>isolated origin</a>, the
+cookie should be double-keyed, such that the cookie is only sent on requests initiated by contexts
+in which the top-level document is the same <a>isolated origin</a>. This section defines
+modifications to [[!COOKIES]] to support these double-keyed cookies.
+
+#### Storage model #### {#cookies-storage-model}
+
+Section 5.3 of [[!COOKIES]] should be modified to store an additional `isolated-origin` field for
+each cookie. When processing a cookie, if the <a>request</a> has a non-null <a>client</a>, then let
+`top origin` be the <a for="Document">origin</a> of the <a>request</a>'s <a>client</a>'s
+<a>responsible browsing context</a>'s <a>top-level browsing context</a>'s <a>active Document</a>. If
+`top origin` is an <a>isolated origin</a>, then then the user agent should set the `isolated-origin`
+cookie field to `top origin`. Otherwise, the user agent should set the `isolated-origin` cookie
+field to the empty string.
+
+ISSUE: define this section for Worker-based requests
+
+#### The Cookie header #### {#cookie-header}
+
+Section 5.4 of [[!COOKIES]] should be modified to add the following to the list of requirements in
+step 1:
+
+- If the cookie's `isolated-origin` field is not the empty string, then the <a>request</a> must have
+  a non-null <a>client</a> whose <a>responsible browsing context</a>'s <a>top-level browsing
+  context</a>'s <a>active Document</a>'s <a for="Document">origin</a> is an <a>isolated origin</a> and
+  is <a>same origin</a> with the cookie's `isolated-origin` field.
 
 ISSUE: these cookie changes don't prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
@@ -231,8 +253,8 @@ context</a>, the user agent must check to see if that <a>top-level browsing cont
 session storage area for the pair `(origin, isolated)`, where `origin` is the
 document's <a for="/">origin</a> and `isolated` is true if `origin` is an <a>isolated origin</a> and
 false otherwise. If it does, then that is the <a>Document</a>'s assigned session storage area. If it
-does not, a new storage area for that document's <a>origin</a> must be created, and then <i>that</i>
-is the <a>Document</a>'s assigned session storage area.
+does not, a new storage area for that document's <a for="Document">origin</a> must be created, and
+then <i>that</i> is the <a>Document</a>'s assigned session storage area.
 
 ### Disowning isolated openers ### {#disown-opener}
 
