@@ -1394,7 +1394,9 @@ Parts of this work may be from another specification document.  If so, those par
   </div>
   <h2 class="no-num no-toc no-ref heading settled" id="abstract"><span class="content">Abstract</span></h2>
   <div class="p-summary" data-fill-with="abstract">
-   <p>Isolation: Good feature, or the best feature?</p>
+   <p>This specification defines an isolation policy that aims to protect an origin from malicious web
+
+content.</p>
   </div>
   <div data-fill-with="at-risk"></div>
   <nav data-fill-with="table-of-contents" id="toc">
@@ -1472,7 +1474,8 @@ sensitive user data or take actions on a user’s behalf.</p>
     <li data-md="">
      <p>Trick the user into revealing data or taking actions via clickjacking attacks.</p>
     <li data-md="">
-     <p>Navigate a security-critical application to a phishing page without the user noticing.</p>
+     <p>Navigate a security-critical application to a phishing page without the user’s knowledge, and then
+trick the user into leaking sensitive data.</p>
     <li data-md="">
      <p>Leverage a browser vulnerability to gain access to data from other origins (universal XSS or
 UXSS).</p>
@@ -1483,76 +1486,76 @@ to, thereby reducing its exposure to other web content. Developers responsible f
 web applications can choose to trade away some of the features of being on the open web (such as
 full linkability) in exchange for better protection from malicious web content.</p>
    <h3 class="heading settled" data-level="1.1" id="threat"><span class="secno">1.1. </span><span class="content">Threat Model</span><a class="self-link" href="#threat"></a></h3>
-   <p>MegaCorp, Inc. has deployed a security-critical application on <code>example.com</code>. Malicious attackers
-in control of <code>evil.com</code> might attack this application in a number of ways which this document aims
-to address:</p>
+   <p>We consider a security-critical application, <code>very-important.com</code>, whose developers want to isolate
+it from regular web content like <code>evil.com</code>. We assume that <code>very-important.com</code> is a large,
+complicated site with many developers, some of whom occasionally make mistakes, such as accidentally
+opening up a reflected XSS vulnerability. We also assume that the user does not know that <code>evil.com</code> is evil, and also that the user is not necessarily a power user; thus the user does not necessarily
+take precautions such as using <code>evil.com</code> and <code>very-important.com</code> in separate profiles or
+browsers. In our threat model, <code>evil.com</code> might try to attack <code>very-important.com</code> in a number of
+ways which this document aims to address:</p>
    <ol>
     <li data-md="">
-     <p><code>evil.com</code> might cause the user’s browser to send a request to <code>example.com</code> that exploits a
-  cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerability. Such
+     <p><code>evil.com</code> might cause the user’s browser to send a request to <code>very-important.com</code> that
+  exploits a cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerability. Such
   vulnerabilities might be triggered by navigational requests (via <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a></code> or <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>), or by subresource requests (via <code><a data-link-type="element" href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-img-element">img</a></code>, etc).</p>
     <li data-md="">
-     <p><code>example.com</code> might open a link to <code>evil.com</code> (for example, user-generated content could include
-  an auto-linked reference to that origin). This allows <code>evil.com</code> to obtain a reference to the <code>example.com</code> window via the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener"><code>window.opener</code></a> attribute, which opens
-  up communication channels (<code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage()</a></code>, frame counting and traversal, etc.) that <code>example.com</code> might not be expecting.</p>
+     <p><code>very-important.com</code> might open a link to <code>evil.com</code> (for example, user-generated content could
+  include an auto-linked reference to that origin, or a content write posted a link to <code>evil.com</code> without knowing that it is evil). This allows <code>evil.com</code> to obtain a reference to the <code>very-important.com</code> window via the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-opener"><code>window.opener</code></a> attribute,
+  which opens up communication channels (<code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/comms.html#dom-window-postmessage">postMessage()</a></code>, frame counting and traversal,
+  navigation of the <code>very-important.com</code> window, etc.) that <code>very-important.com</code> might not be
+  expecting.</p>
     <li data-md="">
      <p>Likewise, <code>evil.com</code> can obtain such a reference via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>.</p>
     <li data-md="">
-     <p><code>evil.com</code> might exploit a vulnerability in the browser itself (UXSS) to gain access to <code>example.com</code> data and cookies.</p>
+     <p><code>evil.com</code> might exploit a vulnerability in the browser itself (UXSS) to gain access to <code>very-important.com</code> data and cookies.</p>
      <p class="note" role="note">Note: The mechanism proposed in this document does not aim to give hard guarantees about
   protection from UXSS, but does hope to mitigate some of the risks on a best-effort basis.</p>
     <li data-md="">
-     <p><code>evil.com</code> might be able to extract data from <code>example.com</code> by loading its resources
+     <p><code>evil.com</code> might be able to extract data from <code>very-important.com</code> by loading its resources
   or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
   headers, to timing attacks like <span>[HEIST]</span>, <span>[PIXEL-PERFECT]</span>, etc.</p>
     <li data-md="">
-     <p><code>evil.com</code> might be able to extract data from <code>example.com</code>'s cross-site
-  dependencies (say <code>investments-r-us.biz</code>), as its users may authenticate to these dependencies,
-  then exposing that ambient authority to attack.</p>
+     <p><code>very-important.com</code> might embed resources from other origins (e.g., <code>investments-r-us.biz</code>),
+  where the user becomes authenticated with <code>investments-r-us.biz</code> by authenticating with <code>very-important.com</code>. <code>evil.com</code> might then be able to extract <code>very-important.com</code> user data
+  from <code>investments-r-us.biz</code>, even if it can’t attack <code>very-important.com</code> directly.</p>
     <li data-md="">
-     <p><code>evil.com</code> and <code>example.com</code> might in fact be <code>evil.example.com</code> and <code>app.example.com</code>, in which
-  case:</p>
+     <p><code>evil.com</code> and <code>very-important.com</code> might in fact be <code>evil.example.com</code> and <code>very-important.example.com</code>, in which case:</p>
      <ol>
       <li data-md="">
        <p><code>evil.example.com</code> might try to set a cookie for all of <code>example.com</code> in hopes that it can
-  fix a session or CSRF token for the user on <code>app.example.com</code>, or exploit .</p>
+  fix a session or CSRF token for the user on <code>very-important.example.com</code>.</p>
       <li data-md="">
-       <p><code>evil.example.com</code> might take advantage of <code>app.example.com</code>'s (ill-advised) loosening of
-  the same-origin policy via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/dom.html#document">Document</a></code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-domain">domain</a></code> attribute.</p>
+       <p><code>evil.example.com</code> might take advantage of <code>very-important.example.com</code>'s (ill-advised)
+  loosening of the same-origin policy via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/dom.html#document">Document</a></code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-domain">domain</a></code> attribute.</p>
      </ol>
    </ol>
    <h3 class="heading settled" data-level="1.2" id="strategy"><span class="secno">1.2. </span><span class="content">Mitigation Strategy</span><a class="self-link" href="#strategy"></a></h3>
    <p>To address the threats above, this document details an origin-wide isolation mechanism that aims to
-break the communication channels between <code>example.com</code> and <code>evil.com</code>. When MegaCorp, Inc. opts-in
-to this mechanism, the user agent will enforce the following:</p>
+break the communication channels between <code>very-important.com</code> and <code>evil.com</code>. When <code>very-important.com</code> opts-in to this mechanism, the user agent will enforce the following:</p>
    <ol>
     <li data-md="">
-     <p>Resources from <code>example.com</code> may not be framed by cross-origin contexts. That is, the user
-  agent will act as though <code>Content-Security-Policy: frame-ancestors 'self'</code> is delivered with
-  each resource. This prevents <code>evil.com</code> from exploiting attacks that require control over <code>example.com</code>'s browsing context (<span>[PIXEL-PERFECT]</span>, as well as straightforward clickjacking),
-  or access to <code>example.com</code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code> (via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#dom-iframe-contentwindow">contentWindow</a></code>).</p>
+     <p>Resources from <code>very-important.com</code> may not be framed by cross-origin contexts. That is, the
+  user agent will act as though <code>Content-Security-Policy: frame-ancestors 'self'</code> is delivered
+  with each resource. This prevents <code>evil.com</code> from exploiting attacks that require control over <code>very-important.com</code>'s browsing context (<span>[PIXEL-PERFECT]</span>, as well as straightforward
+  clickjacking), or access to <code>very-important.com</code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code> (via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/embedded-content.html#dom-iframe-contentwindow">contentWindow</a></code>).</p>
     <li data-md="">
-     <p>Cross-origin resources which <code>example.com</code> frames are not given access to <code>window.top</code> or <code>window.parent</code> (those accessors will return <code>null</code>). This prevents <code>evil.com</code> from exploiting
-  attacks which require access to <code>example.com</code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, or navigating the user to an
-  unexpected URL to replace <code>example.com</code> in the top-level browsing context.</p>
+     <p>Cross-origin resources framed by <code>very-important.com</code> are not given access to <code>window.top</code> or <code>window.parent</code> (those accessors will return <code>null</code>). This prevents <code>evil.com</code> from exploiting
+  attacks which require access to <code>very-important.com</code>'s <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/browsers.html#window">Window</a></code>, or navigating the user to an
+  unexpected URL to replace <code>very-important.com</code> in the top-level browsing context.</p>
     <li data-md="">
-     <p>When <code>example.com</code> opens a new, cross-origin window (via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>, <code>&lt;a target="_blank">...&lt;/a></code>, etc.), the new window will <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>, and the
+     <p>When <code>very-important.com</code> opens a new, cross-origin window (via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>, <code>&lt;a target="_blank">...&lt;/a></code>, etc.), the new window will <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>, and the
   call to <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code> will return <code>null</code>. That is, the user agent will act as though <a data-link-type="dfn">noopener</a> is specified on outgoing links and <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code> calls.</p>
-     <p>Likewise, when <code>example.com</code> is opened from a cross-origin window, it will <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its
+     <p>Likewise, when <code>very-important.com</code> is opened from a cross-origin window, it will <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its
   opener</a>, and the return value of <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code> in the opener context will be <code>null</code>.</p>
     <li data-md="">
-     <p>Something something cookies.</p>
-     <p class="issue" id="issue-31eda315"><a class="self-link" href="#issue-31eda315"></a> I have no idea what makes sense here.</p>
+     <p>All cookies set by <code>very-important.com</code> will be forced to be <a data-link-type="dfn" href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#same-site-cookies">same-site cookies</a>. This
+  prevents <code>evil.com</code> from initiating authenticated requests to <code>very-important.com</code>. Further, all
+  cookies set on <code>very-important.com</code> (including cookies set by responses to cross-origin
+  requests) will be double-keyed and not sent on requests that occur outside the isolated
+  context. This prevents <code>evil.com</code> from attacking ambient authority granted to <code>very-important.com</code>'s cross-site dependencies by virtue of being embedded in <code>very-important.com</code>.</p>
     <li data-md="">
      <p>Something something cross-origin navigation to <code>example.com</code>.</p>
-     <p class="issue" id="issue-f383d4ff"><a class="self-link" href="#issue-f383d4ff"></a> Force preflights for navigational requests from <code>evil.com</code> to <code>example.com</code>. A non-2XX
-  response will result in returning a synthetic client-side redirect response to the root of the
-  origin.</p>
-    <li data-md="">
-     <p>Something something cross-origin subresources loaded from <code>example.com</code>.</p>
-     <p class="issue" id="issue-4e54a417"><a class="self-link" href="#issue-4e54a417"></a> Should we allow subresource requests from <code>evil.com</code> to <code>example.com</code> at all? If not,
-  easy: network error. If so, we need to either double-key <code>example.com</code>'s cookies, or ensure
-  that they’re all treated as <code>SameSite=Strict</code>.</p>
+     <p class="issue" id="issue-aaabd80d"><a class="self-link" href="#issue-aaabd80d"></a> Update this with David’s navigation manager proposal</p>
     <li data-md="">
      <p>The user agent should load <code>example.com</code> into a separate process from other web content.</p>
      <p class="note" role="note">Note: This is not a firm guarantee (especially since not all browsers implement per-site process
@@ -1898,6 +1901,11 @@ isolated origin.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#unicode-serialisation-of-an-origin">unicode serialization of an origin</a>
     </ul>
    <li>
+    <a data-link-type="biblio">[samesitecookies]</a> defines the following terms:
+    <ul>
+     <li><a href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#same-site-cookies">same-site cookies</a>
+    </ul>
+   <li>
     <a data-link-type="biblio">[WHATWG-URL]</a> defines the following terms:
     <ul>
      <li><a href="https://url.spec.whatwg.org/#dom-url-origin">origin</a>
@@ -1922,13 +1930,7 @@ isolated origin.</p>
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
-   <div class="issue"> I have no idea what makes sense here.<a href="#issue-31eda315"> ↵ </a></div>
-   <div class="issue"> Force preflights for navigational requests from <code>evil.com</code> to <code>example.com</code>. A non-2XX
-  response will result in returning a synthetic client-side redirect response to the root of the
-  origin.<a href="#issue-f383d4ff"> ↵ </a></div>
-   <div class="issue"> Should we allow subresource requests from <code>evil.com</code> to <code>example.com</code> at all? If not,
-  easy: network error. If so, we need to either double-key <code>example.com</code>'s cookies, or ensure
-  that they’re all treated as <code>SameSite=Strict</code>.<a href="#issue-4e54a417"> ↵ </a></div>
+   <div class="issue"> Update this with David’s navigation manager proposal<a href="#issue-aaabd80d"> ↵ </a></div>
    <div class="issue"> define an HTTP header that is processed in Fetch and calls isolate-an-origin or
 deisolate-an-origin<a href="#issue-c08cb260"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>

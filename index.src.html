@@ -8,7 +8,9 @@ Editor: Tanvi Vyas
 Editor: David Ross
 Editor: Mike West
 Editor: Joel Weinberger
-Abstract: Isolation: Good feature, or the best feature?
+Abstract:
+  This specification defines an isolation policy that aims to protect an origin from malicious web
+  content.
 Indent: 2
 Version History: https://github.com/mikewest/isolation/commits/master/index.src.html
 !Participate: <a href="https://github.com/mikewest/isolation/issues/new">File an issue</a> (<a href="https://github.com/mikewest/isolation/issues">open issues</a>)
@@ -21,6 +23,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
     text: initialising a new document object; url: initialise-the-document-object
     text: storage object initialisation steps; url: storage-object-initialisation-steps
     text: Storage; url: storage-2
+spec: SAMESITECOOKIES; urlPrefix: https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00
+  type: dfn
+    text: same-site cookies
 </pre>
 
 Introduction {#intro}
@@ -36,7 +41,8 @@ For example, malicious content can:
 
 - Trick the user into revealing data or taking actions via clickjacking attacks.
 
-- Navigate a security-critical application to a phishing page without the user noticing.
+- Navigate a security-critical application to a phishing page without the user's knowledge, and then
+  trick the user into leaking sensitive data.
 
 - Leverage a browser vulnerability to gain access to data from other origins (universal XSS or
   UXSS).
@@ -50,89 +56,94 @@ full linkability) in exchange for better protection from malicious web content.
 Threat Model {#threat}
 ------------
 
-MegaCorp, Inc. has deployed a security-critical application on `example.com`. Malicious attackers
-in control of `evil.com` might attack this application in a number of ways which this document aims
-to address:
+We consider a security-critical application, `very-important.com`, whose developers want to isolate
+it from regular web content like `evil.com`. We assume that `very-important.com` is a large,
+complicated site with many developers, some of whom occasionally make mistakes, such as accidentally
+opening up a reflected XSS vulnerability. We also assume that the user does not know that `evil.com`
+is evil, and also that the user is not necessarily a power user; thus the user does not necessarily
+take precautions such as using `evil.com` and `very-important.com` in separate profiles or
+browsers. In our threat model, `evil.com` might try to attack `very-important.com` in a number of
+ways which this document aims to address:
 
-1.  `evil.com` might cause the user's browser to send a request to `example.com` that exploits a
-    cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerability. Such
+1.  `evil.com` might cause the user's browser to send a request to `very-important.com` that
+    exploits a cross-site scripting (XSS) or cross-site request forgery (CSRF) vulnerability. Such
     vulnerabilities might be triggered by navigational requests (via <{iframe}> or
     {{Window/open()}}), or by subresource requests (via <{img}>, etc).
 
-2.  `example.com` might open a link to `evil.com` (for example, user-generated content could include
-    an auto-linked reference to that origin). This allows `evil.com` to obtain a reference to the
-    `example.com` window via the <a attribute lt="opener">`window.opener`</a> attribute, which opens
-    up communication channels ({{Window/postMessage()}}, frame counting and traversal, etc.) that
-    `example.com` might not be expecting.
+2.  `very-important.com` might open a link to `evil.com` (for example, user-generated content could
+    include an auto-linked reference to that origin, or a content write posted a link to `evil.com`
+    without knowing that it is evil). This allows `evil.com` to obtain a reference to the
+    `very-important.com` window via the <a attribute lt="opener">`window.opener`</a> attribute,
+    which opens up communication channels ({{Window/postMessage()}}, frame counting and traversal,
+    navigation of the `very-important.com` window, etc.) that `very-important.com` might not be
+    expecting.
 
 3.  Likewise, `evil.com` can obtain such a reference via {{Window/open()}}.
 
 4.  `evil.com` might exploit a vulnerability in the browser itself (UXSS) to gain access to
-    `example.com` data and cookies.
+    `very-important.com` data and cookies.
 
     Note: The mechanism proposed in this document does not aim to give hard guarantees about
     protection from UXSS, but does hope to mitigate some of the risks on a best-effort basis.
 
-5.  `evil.com` might be able to extract data from `example.com` by loading its resources
+5.  `evil.com` might be able to extract data from `very-important.com` by loading its resources
     or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
     headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
 
-6.  `evil.com` might be able to extract data from `example.com`'s cross-site
-    dependencies (say `investments-r-us.biz`), as its users may authenticate to these dependencies,
-    then exposing that ambient authority to attack.
+6.  `very-important.com` might embed resources from other origins (e.g., `investments-r-us.biz`),
+    where the user becomes authenticated with `investments-r-us.biz` by authenticating with
+    `very-important.com`. `evil.com` might then be able to extract `very-important.com` user data
+    from `investments-r-us.biz`, even if it can't attack `very-important.com` directly.
 
-7.  `evil.com` and `example.com` might in fact be `evil.example.com` and `app.example.com`, in which
-    case:
+7.  `evil.com` and `very-important.com` might in fact be `evil.example.com` and
+    `very-important.example.com`, in which case:
 
     1.  `evil.example.com` might try to set a cookie for all of `example.com` in hopes that it can
-        fix a session or CSRF token for the user on `app.example.com`, or exploit .
+        fix a session or CSRF token for the user on `very-important.example.com`.
 
-    2.  `evil.example.com` might take advantage of `app.example.com`'s (ill-advised) loosening of
-        the same-origin policy via {{Document}}'s {{Document/domain}} attribute.
+    2.  `evil.example.com` might take advantage of `very-important.example.com`'s (ill-advised)
+        loosening of the same-origin policy via {{Document}}'s {{Document/domain}} attribute.
 
 Mitigation Strategy {#strategy}
 -------------------
 
 To address the threats above, this document details an origin-wide isolation mechanism that aims to
-break the communication channels between `example.com` and `evil.com`. When MegaCorp, Inc. opts-in
-to this mechanism, the user agent will enforce the following:
+break the communication channels between `very-important.com` and `evil.com`. When
+`very-important.com` opts-in to this mechanism, the user agent will enforce the following:
 
-1.  Resources from `example.com` may not be framed by cross-origin contexts. That is, the user
-    agent will act as though `Content-Security-Policy: frame-ancestors 'self'` is delivered with
-    each resource. This prevents `evil.com` from exploiting attacks that require control over
-    `example.com`'s browsing context ([[PIXEL-PERFECT]], as well as straightforward clickjacking),
-    or access to `example.com`'s {{Window}} (via {{HTMLIFrameElement/contentWindow}}).
+1.  Resources from `very-important.com` may not be framed by cross-origin contexts. That is, the
+    user agent will act as though `Content-Security-Policy: frame-ancestors 'self'` is delivered
+    with each resource. This prevents `evil.com` from exploiting attacks that require control over
+    `very-important.com`'s browsing context ([[PIXEL-PERFECT]], as well as straightforward
+    clickjacking), or access to `very-important.com`'s {{Window}} (via
+    {{HTMLIFrameElement/contentWindow}}).
 
-2.  Cross-origin resources which `example.com` frames are not given access to `window.top` or
+2.  Cross-origin resources framed by `very-important.com` are not given access to `window.top` or
     `window.parent` (those accessors will return `null`). This prevents `evil.com` from exploiting
-    attacks which require access to `example.com`'s {{Window}}, or navigating the user to an
-    unexpected URL to replace `example.com` in the top-level browsing context.
+    attacks which require access to `very-important.com`'s {{Window}}, or navigating the user to an
+    unexpected URL to replace `very-important.com` in the top-level browsing context.
 
-3.  When `example.com` opens a new, cross-origin window (via {{Window/open()}},
+3.  When `very-important.com` opens a new, cross-origin window (via {{Window/open()}},
     `<a target="_blank">...</a>`, etc.), the new window will <a>disown its opener</a>, and the
     call to {{Window/open()}} will return `null`. That is, the user agent will act as though
     <a>noopener</a> is specified on outgoing links and {{Window/open()}} calls.
 
-    Likewise, when `example.com` is opened from a cross-origin window, it will <a>disown its
+    Likewise, when `very-important.com` is opened from a cross-origin window, it will <a>disown its
     opener</a>, and the return value of {{Window/open()}} in the opener context will be `null`.
 
-4.  Something something cookies.
-
-    ISSUE: I have no idea what makes sense here.
+4.  All cookies set by `very-important.com` will be forced to be <a>same-site cookies</a>. This
+    prevents `evil.com` from initiating authenticated requests to `very-important.com`. Further, all
+    cookies set on `very-important.com` (including cookies set by responses to cross-origin
+    requests) will be double-keyed and not sent on requests that occur outside the isolated
+    context. This prevents `evil.com` from attacking ambient authority granted to
+    `very-important.com`'s cross-site dependencies by virtue of being embedded in
+    `very-important.com`.
 
 5.  Something something cross-origin navigation to `example.com`.
 
-    ISSUE: Force preflights for navigational requests from `evil.com` to `example.com`. A non-2XX
-    response will result in returning a synthetic client-side redirect response to the root of the
-    origin.
+    ISSUE: Update this with David's navigation manager proposal
 
-6.  Something something cross-origin subresources loaded from `example.com`.
-
-    ISSUE: Should we allow subresource requests from `evil.com` to `example.com` at all? If not,
-    easy: network error. If so, we need to either double-key `example.com`'s cookies, or ensure
-    that they're all treated as `SameSite=Strict`.
-
-7.  The user agent should load `example.com` into a separate process from other web content.
+6.  The user agent should load `example.com` into a separate process from other web content.
 
     Note: This is not a firm guarantee (especially since not all browsers implement per-site process
     isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.
