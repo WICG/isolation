@@ -186,6 +186,9 @@ This section defines modifications to [[!COOKIES]] to support isolated origins.
 
 ### Forcing cookies to be same-site ### {#forcing-cookies-samesite}
 
+Forcing cookies from isolated origins to be same-site means that an attacker cannot initiate an
+authenticated request from a victim's browser to an isolated origin.
+
 When receiving a cookie from a request-uri whose origin is an <a>isolated origin</a>, Section 5.3
 should be modified to set the cookie's `samesite-flag` field to "Strict" if the request-uri's <a
 lt="is-origin-isolated">origin is isolated</a>.
@@ -194,14 +197,19 @@ lt="is-origin-isolated">origin is isolated</a>.
 
 When a cookie is set on a request for which the top-level document is an <a>isolated origin</a>, the
 cookie should be double-keyed, such that the cookie is only sent on requests initiated by contexts
-in which the top-level document is the same <a>isolated origin</a>. This section defines
-modifications to [[!COOKIES]] to support these double-keyed cookies.
+in which the top-level document is the same <a>isolated origin</a>. This prevents attackers from
+attacking ambient authority that an isolated origin's cross-site dependencies obtain by virtue of
+being embedded in the isolated origin.
+
+This section defines modifications to [[!COOKIES]] to support these double-keyed cookies.
 
 #### Storage model #### {#cookies-storage-model}
 
-Section 5.3 of [[!COOKIES]] should be modified to store an additional `isolated-origin` field for
-each cookie. When processing a cookie, if the <a>request</a> has a non-null <a>client</a>, then let
-`top origin` be the <a for="Document">origin</a> of the <a>request</a>'s <a>client</a>'s
+The storage model of [[!COOKIES]] should be updated to keep track of when cookies are set in a
+top-level isolated origin as follows. Section 5.3 of [[!COOKIES]] should be modified to store an
+additional `isolated-origin` field for each cookie. When processing a cookie, if the <a>request</a>
+has a non-null <a>client</a>, then let `top origin` be the <a for="Document">origin</a> of
+the <a>request</a>'s <a>client</a>'s
 <a>responsible browsing context</a>'s <a>top-level browsing context</a>'s <a>active Document</a>. If
 `top origin` is an <a>isolated origin</a>, then then the user agent should set the `isolated-origin`
 cookie field to `top origin`. Otherwise, the user agent should set the `isolated-origin` cookie
@@ -211,8 +219,9 @@ ISSUE: define this section for Worker-based requests
 
 #### The Cookie header #### {#cookie-header}
 
-Section 5.4 of [[!COOKIES]] should be modified to add the following to the list of requirements in
-step 1:
+[[!COOKIES]] should be updated to ensure that cookies that were set on an isolated origin are not
+sent in other contexts outside that origin. In other words, Section 5.4 of [[!COOKIES]] should be
+modified to add the following to the list of requirements in step 1:
 
 - If the cookie's `isolated-origin` field is not the empty string, then the <a>request</a> must have
   a non-null <a>client</a> whose <a>responsible browsing context</a>'s <a>top-level browsing
@@ -230,9 +239,8 @@ Integration with HTML {#html}
 
 ### Cross-origin framing of isolated origins ### {#cross-origin-framing}
 
-Step 1 of <a>Process a navigate response</a> should be modified to call
-[[#should-block-navigation-response]], so that cross-origin framing of isolated origins is not
-allowed.
+Isolated origins should not be framed by cross-origin content. Step 1 of <a>Process a navigate
+response</a> should be modified to call [[#should-block-navigation-response]].
 
 ### DOM storage ### {#dom-storage}
 
@@ -296,9 +304,10 @@ Algorithms {#algorithms}
     Should |navigation response| in |target| be blocked?
 </h3>
 
-Given a <a>response</a> (|navigation response|) and a <a>browsing context</a> (|target|), this
-algorithm returns "`Blocked`" if |navigation response| is from an isolated origin and one or more of
-the ancestors of |target| is cross-origin.
+This algorithm is used to block cross-origin framing of isolated origins. Given a <a>response</a>
+(|navigation response|) and a <a>browsing context</a> (|target|), this algorithm returns "`Blocked`"
+if |navigation response| is from an isolated origin and one or more of the ancestors of |target| is
+cross-origin.
 
 1. If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
