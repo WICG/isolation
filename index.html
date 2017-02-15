@@ -418,7 +418,7 @@
 	[data-algorithm]:not(.heading) {
 	  padding: .5em;
 	  border: thin solid #ddd; border-radius: .5em;
-	  margin: .5em 0;
+	  margin: .5em calc(-0.5em - 1px);
 	}
 	[data-algorithm]:not(.heading) > :first-child {
 	  margin-top: 0;
@@ -1176,7 +1176,7 @@ Possible extra rowspan handling
 		}
 	}
 </style>
-  <meta content="Bikeshed version 0feafaae1a97b66d9da46b325858f9805ac01fb2" name="generator">
+  <meta content="Bikeshed version 0466dfe0603d05075d063d910336a5796413ac9b" name="generator">
 <style>/* style-md-lists */
 
             /* This is a weird hack for me not yet following the commonmark spec
@@ -1365,13 +1365,13 @@ Possible extra rowspan handling
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Isolated Origins</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2017-02-08">8 February 2017</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2017-02-15">15 February 2017</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Version History:
      <dd><a href="https://github.com/mikewest/isolation/commits/master/index.src.html">https://github.com/mikewest/isolation/commits/master/index.src.html</a>
      <dt>Issue Tracking:
-     <dd><a href="https://github.com/wicg/isolation/issues/">GitHub</a>
+     <dd><a href="https://github.com/WICG/isolation/issues/">GitHub</a>
      <dd><a href="#issues-index">Inline In Spec</a>
      <dt class="editor">Editors:
      <dd class="editor p-author h-card vcard"><span class="p-name fn">Emily Stark</span>
@@ -1386,7 +1386,7 @@ Possible extra rowspan handling
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 8 February 2017,
+In addition, as of 15 February 2017,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1476,6 +1476,10 @@ sensitive user data or take actions on a user’s behalf.</p>
     <li data-md="">
      <p>Navigate a security-critical application to a phishing page without the user’s knowledge, and then
 trick the user into leaking sensitive data.</p>
+   </ul>
+   <p class="issue" id="issue-f5ac66d0"><a class="self-link" href="#issue-f5ac66d0"></a> It may not make sense to describe Isolation as mitigating phishing scenarios like this.  It
+may indeed do so, but it’s not the primary goal.</p>
+   <ul>
     <li data-md="">
      <p>Leverage a browser vulnerability to gain access to data from other origins (universal XSS or
 UXSS).</p>
@@ -1485,6 +1489,8 @@ mitigates these attacks. This specification defines an isolation mechanism that 
 to, thereby reducing its exposure to other web content. Developers responsible for security-critical
 web applications can choose to trade away some of the features of being on the open web (such as
 full linkability) in exchange for better protection from malicious web content.</p>
+   <p class="issue" id="issue-4c7e6390"><a class="self-link" href="#issue-4c7e6390"></a> Given that a navigation manager enables linkability, it may not make sense to suggest there
+is a necessary tradeoff, at least in this respect.</p>
    <h3 class="heading settled" data-level="1.1" id="threat"><span class="secno">1.1. </span><span class="content">Threat Model</span><a class="self-link" href="#threat"></a></h3>
    <p>We consider a security-critical application, <code>very-important.com</code>, whose developers want to isolate
 it from regular web content like <code>evil.com</code>. We assume that <code>very-important.com</code> is a large,
@@ -1508,12 +1514,15 @@ ways which this document aims to address:</p>
      <p>Likewise, <code>evil.com</code> can obtain such a reference via <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code>.</p>
     <li data-md="">
      <p><code>evil.com</code> might exploit a vulnerability in the browser itself (UXSS) to gain access to <code>very-important.com</code> data and cookies.</p>
-     <p class="note" role="note">Note: The mechanism proposed in this document does not aim to give hard guarantees about
+     <p class="note" role="note"><span>Note:</span> The mechanism proposed in this document does not aim to give hard guarantees about
   protection from UXSS, but does hope to mitigate some of the risks on a best-effort basis.</p>
     <li data-md="">
      <p><code>evil.com</code> might be able to extract data from <code>very-important.com</code> by loading its resources
   or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
   headers, to timing attacks like <span>[HEIST]</span>, <span>[PIXEL-PERFECT]</span>, etc.</p>
+   </ol>
+   <p class="issue" id="issue-15bc6f6b"><a class="self-link" href="#issue-15bc6f6b"></a> Maybe mention that this would be facilited by ambient authority?</p>
+   <ol start="6">
     <li data-md="">
      <p><code>very-important.com</code> might embed resources from other origins (e.g., <code>investments-r-us.biz</code>),
   where the user becomes authenticated with <code>investments-r-us.biz</code> by authenticating with <code>very-important.com</code>. <code>evil.com</code> might then be able to extract <code>very-important.com</code> user data
@@ -1553,13 +1562,18 @@ break the communication channels between <code>very-important.com</code> and <co
   cookies set on <code>very-important.com</code> (including cookies set by responses to cross-origin
   requests) will be double-keyed and not sent on requests that occur outside the isolated
   context. This prevents <code>evil.com</code> from attacking ambient authority granted to <code>very-important.com</code>'s cross-site dependencies by virtue of being embedded in <code>very-important.com</code>.</p>
+   </ol>
+   <p class="issue" id="issue-10cbfaa6"><a class="self-link" href="#issue-10cbfaa6"></a> "Strict" same-site cookies?</p>
+   <ol start="5">
     <li data-md="">
-     <p>Something something cross-origin navigation to <code>example.com</code>.</p>
-     <p class="issue" id="issue-aaabd80d"><a class="self-link" href="#issue-aaabd80d"></a> Update this with David’s navigation manager proposal</p>
+     <p>Navigation into the isolated origin will be regulated by a navigation manager.  Code from
+  the isolated origin will get to validate each navigation before allowing it to proceed.</p>
+     <p class="issue" id="issue-85cb04a8"><a class="self-link" href="#issue-85cb04a8"></a> Update this with David’s navigation manager proposal.</p>
     <li data-md="">
      <p>The user agent should load <code>example.com</code> into a separate process from other web content.</p>
-     <p class="note" role="note">Note: This is not a firm guarantee (especially since not all browsers implement per-site process
+     <p class="note" role="note"><span>Note:</span> This is not a firm guarantee (especially since not all browsers implement per-site process
   isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.</p>
+     <p class="issue" id="issue-0a8e4094"><a class="self-link" href="#issue-0a8e4094"></a> Does per-site process isolation as implemented today address UXSS?</p>
    </ol>
    <h2 class="heading settled" data-level="2" id="concepts"><span class="secno">2. </span><span class="content">Key Concepts</span><a class="self-link" href="#concepts"></a></h2>
    <p>An <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="isolated-origin">isolated origin</dfn> is an <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> that has opted in to isolate itself from
@@ -1571,6 +1585,15 @@ otherwise.</p>
    <p>When asked to <dfn class="algorithm" data-algorithm="isolate an origin" data-dfn-type="dfn" data-local-lt="isolate-an-origin" data-noexport="" id="isolate-an-origin">isolate an origin<a class="self-link" href="#isolate-an-origin"></a></dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-2">isolated
 origin store</a> adds the given origin to the set.</p>
    <p>When asked to <dfn class="algorithm" data-algorithm="de-isolate an origin" data-dfn-type="dfn" data-local-lt="deisolate-an-origin" data-noexport="" id="de-isolate-an-origin">de-isolate an origin<a class="self-link" href="#de-isolate-an-origin"></a></dfn>, an <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-3">isolated origin store</a> removes the given origin from the set.</p>
+   <p class="issue" id="issue-2062ef85"><a class="self-link" href="#issue-2062ef85"></a> Better define what the UI experience should be, to whatever extent makes sense in this
+context.  Specifically, do isolated origins always appear in their own window (ala Chrome apps) or
+is it possible to navigate to an isolated origin in the browser as with any other site.  There are
+likely pros / cons of either approach, and important considerations in either case.</p>
+   <p class="issue" id="issue-145e42bc"><a class="self-link" href="#issue-145e42bc"></a> Better define issues around isolated and non-isolated content on the same origin.  For
+example, content on example.com may be encountered in the browser client for some time before
+isolation "kicks in."  So it makes sense to think about non-isolated content attempting to
+attack isolated content on the same origin.  What gets spec’d here might be modelled after the
+behavior we’d expect to see from any reasonable isolation primative.</p>
    <h2 class="heading settled" data-level="3" id="delivery"><span class="secno">3. </span><span class="content">Delivery</span><a class="self-link" href="#delivery"></a></h2>
    <p class="issue" id="issue-c08cb260"><a class="self-link" href="#issue-c08cb260"></a> define an HTTP header that is processed in Fetch and calls isolate-an-origin or
 deisolate-an-origin</p>
@@ -1579,21 +1602,32 @@ deisolate-an-origin</p>
    <h3 class="heading settled" data-level="4.1" id="cookies"><span class="secno">4.1. </span><span class="content">Integration with Cookies</span><a class="self-link" href="#cookies"></a></h3>
    <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support isolated origins.</p>
    <h4 class="heading settled" data-level="4.1.1" id="forcing-cookies-samesite"><span class="secno">4.1.1. </span><span class="content">Forcing cookies to be same-site</span><a class="self-link" href="#forcing-cookies-samesite"></a></h4>
+   <p>Forcing cookies from isolated origins to be same-site means that an attacker cannot initiate an
+authenticated request from a victim’s browser to an isolated origin.</p>
    <p>When receiving a cookie from a request-uri whose origin is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-1">isolated origin</a>, Section 5.3
 should be modified to set the cookie’s <code>samesite-flag</code> field to "Strict" if the request-uri’s <a data-link-type="dfn" href="#if-an-origin-is-isolated" id="ref-for-if-an-origin-is-isolated-1">origin is isolated</a>.</p>
    <h4 class="heading settled" data-level="4.1.2" id="double-keyed-cookies"><span class="secno">4.1.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-cookies"></a></h4>
    <p>When a cookie is set on a request for which the top-level document is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-2">isolated origin</a>, the
 cookie should be double-keyed, such that the cookie is only sent on requests initiated by contexts
-in which the top-level document is the same <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a>. This section defines
-modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support these double-keyed cookies.</p>
+in which the top-level document is the same <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a>. This prevents attackers from
+attacking ambient authority that an isolated origin’s cross-site dependencies obtain by virtue of
+being embedded in the isolated origin.</p>
+   <p class="issue" id="issue-5f38c031"><a class="self-link" href="#issue-5f38c031"></a> "Double-keyed" is an implementation detail that might not accurately portray how this works
+if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)</p>
+   <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support these double-keyed cookies.</p>
    <h5 class="heading settled" data-level="4.1.2.1" id="cookies-storage-model"><span class="secno">4.1.2.1. </span><span class="content">Storage model</span><a class="self-link" href="#cookies-storage-model"></a></h5>
-   <p>Section 5.3 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be modified to store an additional <code>isolated-origin</code> field for
-each cookie. When processing a cookie, if the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> has a non-null <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>, then let <code>top origin</code> be the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> of the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>. If <code>top origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a>, then then the user agent should set the <code>isolated-origin</code> cookie field to <code>top origin</code>. Otherwise, the user agent should set the <code>isolated-origin</code> cookie
+   <p>The storage model of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to keep track of when cookies are set in a
+top-level isolated origin as follows. Section 5.3 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be modified to store an
+additional <code>isolated-origin</code> field for each cookie. When processing a cookie, if the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> has a non-null <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>, then let <code>top origin</code> be the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> of
+the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>. If <code>top origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a>, then then the user agent should set the <code>isolated-origin</code> cookie field to <code>top origin</code>. Otherwise, the user agent should set the <code>isolated-origin</code> cookie
 field to the empty string.</p>
+   <p class="issue" id="issue-c7bb9149"><a class="self-link" href="#issue-c7bb9149"></a> It doesn’t seem that the isolated-origin field is necessary.  (Again, assuming that something
+like StoragePartition is used to build isolated origins.)</p>
    <p class="issue" id="issue-66f1abd9"><a class="self-link" href="#issue-66f1abd9"></a> define this section for Worker-based requests</p>
    <h5 class="heading settled" data-level="4.1.2.2" id="cookie-header"><span class="secno">4.1.2.2. </span><span class="content">The Cookie header</span><a class="self-link" href="#cookie-header"></a></h5>
-   <p>Section 5.4 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be modified to add the following to the list of requirements in
-step 1:</p>
+   <p><a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to ensure that cookies that were set on an isolated origin are not
+sent in other contexts outside that origin. In other words, Section 5.4 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be
+modified to add the following to the list of requirements in step 1:</p>
    <ul>
     <li data-md="">
      <p>If the cookie’s <code>isolated-origin</code> field is not the empty string, then the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> must have
@@ -1606,10 +1640,12 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.</p>
+   <p class="issue" id="issue-da6e6590"><a class="self-link" href="#issue-da6e6590"></a> Is this all a moot point assuming that something like StoragePartition is used to build
+isolated origins?</p>
    <h3 class="heading settled" data-level="4.2" id="html"><span class="secno">4.2. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html"></a></h3>
    <h4 class="heading settled" data-level="4.2.1" id="cross-origin-framing"><span class="secno">4.2.1. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
-   <p>Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>, so that cross-origin framing of isolated origins is not
-allowed.</p>
+   <p>Isolated origins should not be framed by cross-origin content. Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate
+response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>.</p>
    <h4 class="heading settled" data-level="4.2.2" id="dom-storage"><span class="secno">4.2.2. </span><span class="content">DOM storage</span><a class="self-link" href="#dom-storage"></a></h4>
    <p>When an origin becomes isolated, it should use its own DOM storage separate from what it used before
 being isolated.</p>
@@ -1621,6 +1657,8 @@ origins. Step 3 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/#s
      <p>Check to see if the user agent has allocated a local storage area for the <code>(origin, isolated)</code> pair, where <code>origin</code> is the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> of the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">Document</a> of the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-window">Window</a> object on which the attribute was accessed, and <code>isolated</code> is a boolean flag that is true if the <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-6">isolated origin</a> and false otherwise. If it has not, create a
  new storage area for that <code>(origin, isolated)</code> pair.</p>
    </ol>
+   <p class="issue" id="issue-969892cb"><a class="self-link" href="#issue-969892cb"></a> Like cookies, this is addressed "automatically" by the use of a sufficiently robust
+isolation primitive.</p>
    <h5 class="heading settled" data-level="4.2.2.2" id="sessionstorage"><span class="secno">4.2.2.2. </span><span class="content"><code>sessionStorage</code></span><a class="self-link" href="#sessionstorage"></a></h5>
    <p><code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webstorage.html#dom-sessionstorage">sessionStorage</a></code> should be modified as follows. Each <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a> should have
 a unique set of session storage areas, one for each <code>(origin, isolated)</code> pair, where <code>isolated</code> is a
@@ -1646,9 +1684,9 @@ null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.w
 modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-10">isolated origin</a>.</p>
    <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
    <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
-   <p>Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this
-algorithm returns "<code>Blocked</code>" if <var>navigation response</var> is from an isolated origin and one or more of
-the ancestors of <var>target</var> is cross-origin.</p>
+   <p>This algorithm is used to block cross-origin framing of isolated origins. Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this algorithm returns "<code>Blocked</code>"
+if <var>navigation response</var> is from an isolated origin and one or more of the ancestors of <var>target</var> is
+cross-origin.</p>
    <ol>
     <li data-md="">
      <p>If <var>target</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, return "<code>Allowed</code>".</p>
@@ -1930,16 +1968,40 @@ isolated origin.</p>
   </dl>
   <h2 class="no-num no-ref heading settled" id="issues-index"><span class="content">Issues Index</span><a class="self-link" href="#issues-index"></a></h2>
   <div style="counter-reset:issue">
-   <div class="issue"> Update this with David’s navigation manager proposal<a href="#issue-aaabd80d"> ↵ </a></div>
+   <div class="issue"> It may not make sense to describe Isolation as mitigating phishing scenarios like this.  It
+may indeed do so, but it’s not the primary goal.<a href="#issue-f5ac66d0"> ↵ </a></div>
+   <div class="issue"> Given that a navigation manager enables linkability, it may not make sense to suggest there
+is a necessary tradeoff, at least in this respect.<a href="#issue-4c7e6390"> ↵ </a></div>
+   <div class="issue"> Maybe mention that this would be facilited by ambient authority?<a href="#issue-15bc6f6b"> ↵ </a></div>
+   <div class="issue"> "Strict" same-site cookies?<a href="#issue-10cbfaa6"> ↵ </a></div>
+   <div class="issue"> Update this with David’s navigation manager proposal.<a href="#issue-85cb04a8"> ↵ </a></div>
+   <div class="issue"> Does per-site process isolation as implemented today address UXSS?<a href="#issue-0a8e4094"> ↵ </a></div>
+   <div class="issue"> Better define what the UI experience should be, to whatever extent makes sense in this
+context.  Specifically, do isolated origins always appear in their own window (ala Chrome apps) or
+is it possible to navigate to an isolated origin in the browser as with any other site.  There are
+likely pros / cons of either approach, and important considerations in either case.<a href="#issue-2062ef85"> ↵ </a></div>
+   <div class="issue"> Better define issues around isolated and non-isolated content on the same origin.  For
+example, content on example.com may be encountered in the browser client for some time before
+isolation "kicks in."  So it makes sense to think about non-isolated content attempting to
+attack isolated content on the same origin.  What gets spec’d here might be modelled after the
+behavior we’d expect to see from any reasonable isolation primative.<a href="#issue-145e42bc"> ↵ </a></div>
    <div class="issue"> define an HTTP header that is processed in Fetch and calls isolate-an-origin or
 deisolate-an-origin<a href="#issue-c08cb260"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>
+   <div class="issue"> "Double-keyed" is an implementation detail that might not accurately portray how this works
+if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)<a href="#issue-5f38c031"> ↵ </a></div>
+   <div class="issue"> It doesn’t seem that the isolated-origin field is necessary.  (Again, assuming that something
+like StoragePartition is used to build isolated origins.)<a href="#issue-c7bb9149"> ↵ </a></div>
    <div class="issue"> define this section for Worker-based requests<a href="#issue-66f1abd9"> ↵ </a></div>
    <div class="issue"> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.<a href="#issue-cad8c46e"> ↵ </a></div>
+   <div class="issue"> Is this all a moot point assuming that something like StoragePartition is used to build
+isolated origins?<a href="#issue-da6e6590"> ↵ </a></div>
+   <div class="issue"> Like cookies, this is addressed "automatically" by the use of a sufficiently robust
+isolation primitive.<a href="#issue-969892cb"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>

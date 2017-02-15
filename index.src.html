@@ -44,6 +44,9 @@ For example, malicious content can:
 - Navigate a security-critical application to a phishing page without the user's knowledge, and then
   trick the user into leaking sensitive data.
 
+ISSUE: It may not make sense to describe Isolation as mitigating phishing scenarios like this.  It
+may indeed do so, but it's not the primary goal.
+
 - Leverage a browser vulnerability to gain access to data from other origins (universal XSS or
   UXSS).
 
@@ -52,6 +55,9 @@ mitigates these attacks. This specification defines an isolation mechanism that 
 to, thereby reducing its exposure to other web content. Developers responsible for security-critical
 web applications can choose to trade away some of the features of being on the open web (such as
 full linkability) in exchange for better protection from malicious web content.
+
+ISSUE: Given that a navigation manager enables linkability, it may not make sense to suggest there
+is a necessary tradeoff, at least in this respect.
 
 Threat Model {#threat}
 ------------
@@ -89,6 +95,8 @@ ways which this document aims to address:
 5.  `evil.com` might be able to extract data from `very-important.com` by loading its resources
     or framing its content. Extraction techniques could range from exploitation of overly-broad CORS
     headers, to timing attacks like [[HEIST]], [[PIXEL-PERFECT]], etc.
+
+ISSUE: Maybe mention that this would be facilited by ambient authority?
 
 6.  `very-important.com` might embed resources from other origins (e.g., `investments-r-us.biz`),
     where the user becomes authenticated with `investments-r-us.biz` by authenticating with
@@ -139,14 +147,19 @@ break the communication channels between `very-important.com` and `evil.com`. Wh
     `very-important.com`'s cross-site dependencies by virtue of being embedded in
     `very-important.com`.
 
-5.  Something something cross-origin navigation to `example.com`.
+ISSUE: "Strict" same-site cookies?
 
-    ISSUE: Update this with David's navigation manager proposal
+5.  Navigation into the isolated origin will be regulated by a navigation manager.  Code from
+    the isolated origin will get to validate each navigation before allowing it to proceed.
+
+    ISSUE: Update this with David's navigation manager proposal.
 
 6.  The user agent should load `example.com` into a separate process from other web content.
 
     Note: This is not a firm guarantee (especially since not all browsers implement per-site process
     isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.
+
+    ISSUE: Does per-site process isolation as implemented today address UXSS?
 
 
 Key Concepts {#concepts}
@@ -167,6 +180,17 @@ origin store</a> adds the given origin to the set.
 
 When asked to <dfn algorithm local-lt="deisolate-an-origin">de-isolate an origin</dfn>, an
 <a>isolated origin store</a> removes the given origin from the set.
+
+ISSUE: Better define what the UI experience should be, to whatever extent makes sense in this
+context.  Specifically, do isolated origins always appear in their own window (ala Chrome apps) or
+is it possible to navigate to an isolated origin in the browser as with any other site.  There are
+likely pros / cons of either approach, and important considerations in either case.
+
+ISSUE: Better define issues around isolated and non-isolated content on the same origin.  For
+example, content on example.com may be encountered in the browser client for some time before
+isolation "kicks in."  So it makes sense to think about non-isolated content attempting to
+attack isolated content on the same origin.  What gets spec'd here might be modelled after the
+behavior we'd expect to see from any reasonable isolation primative.
 
 Delivery {#delivery}
 ============
@@ -201,6 +225,9 @@ in which the top-level document is the same <a>isolated origin</a>. This prevent
 attacking ambient authority that an isolated origin's cross-site dependencies obtain by virtue of
 being embedded in the isolated origin.
 
+ISSUE: "Double-keyed" is an implementation detail that might not accurately portray how this works
+if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)
+
 This section defines modifications to [[!COOKIES]] to support these double-keyed cookies.
 
 #### Storage model #### {#cookies-storage-model}
@@ -214,6 +241,9 @@ the <a>request</a>'s <a>client</a>'s
 `top origin` is an <a>isolated origin</a>, then then the user agent should set the `isolated-origin`
 cookie field to `top origin`. Otherwise, the user agent should set the `isolated-origin` cookie
 field to the empty string.
+
+ISSUE: It doesn't seem that the isolated-origin field is necessary.  (Again, assuming that something
+like StoragePartition is used to build isolated origins.)
 
 ISSUE: define this section for Worker-based requests
 
@@ -233,6 +263,9 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.
+
+ISSUE: Is this all a moot point assuming that something like StoragePartition is used to build
+isolated origins?
 
 Integration with HTML {#html}
 ------------
@@ -260,6 +293,9 @@ origins. Step 3 of
    object on which the attribute was accessed, and `isolated` is a boolean flag that is true if the
    <a for="/">origin</a> is an <a>isolated origin</a> and false otherwise. If it has not, create a
    new storage area for that `(origin, isolated)` pair.
+
+ISSUE: Like cookies, this is addressed "automatically" by the use of a sufficiently robust
+isolation primitive.
 
 #### `sessionStorage` #### {#sessionstorage}
 
