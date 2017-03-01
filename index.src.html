@@ -18,6 +18,9 @@ Markup Shorthands: css off, markdown on
 </pre>
 
 <pre class="anchors">
+spec: Fetch; urlPrefix: https://fetch.spec.whatwg.org/
+  type: dfn
+    text: main-fetch; url: main-fetch
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
     text: initialising a new document object; url: initialise-the-document-object
@@ -26,6 +29,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 spec: SAMESITECOOKIES; urlPrefix: https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00
   type: dfn
     text: same-site cookies
+spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
+  type: dfn
+    text: WSP; url: appendix-B.1
 </pre>
 
 Introduction {#intro}
@@ -168,19 +174,6 @@ Key Concepts {#concepts}
 An <dfn>isolated origin</dfn> is an <a for="/">origin</a> that has opted in to isolate itself from
 other origins on the web, using the mechanisms defined in this specification.
 
-User agents have an <dfn>isolated origin store</dfn>, which is a set of <a for="/">origins</a> that
-wish to be isolated.
-
-When asked <dfn algorithm local-lt="is-origin-isolated">if an origin is isolated</dfn>, an
-<a>isolated origin store</a> returns true if the given origin is present in the set and false
-otherwise.
-
-When asked to <dfn algorithm local-lt="isolate-an-origin">isolate an origin</dfn>, an <a>isolated
-origin store</a> adds the given origin to the set.
-
-When asked to <dfn algorithm local-lt="deisolate-an-origin">de-isolate an origin</dfn>, an
-<a>isolated origin store</a> removes the given origin from the set.
-
 ISSUE: Better define what the UI experience should be, to whatever extent makes sense in this
 context.  Specifically, do isolated origins always appear in their own window (ala Chrome apps) or
 is it possible to navigate to an isolated origin in the browser as with any other site.  There are
@@ -192,16 +185,74 @@ isolation "kicks in."  So it makes sense to think about non-isolated content att
 attack isolated content on the same origin.  What gets spec'd here might be modelled after the
 behavior we'd expect to see from any reasonable isolation primative.
 
-Delivery {#delivery}
+Opting into isolation {#delivery}
 ============
 
-ISSUE: define an HTTP header that is processed in Fetch and calls isolate-an-origin or
-deisolate-an-origin
+<a>Isolated origins</a> are defined by an <dfn>isolation</dfn> HTTP response header. The syntax for
+the name and value of the header are described by the following ABNF grammar [[!RFC5234]]:
+
+<pre dfn-type="grammar">
+    "Isolation:" *<a>WSP</a> "1" *<a>WSP</a>
+</pre>
+
+[[#html-navigation]] describes how the <a>isolation</a> header is processed to create a
+<a>Document</a> with an isolated origin.
+
+ISSUE: how are Isolation headers processed for Workers?
 
 ISSUE: the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...
 
 Integrations {#integrations}
 ============
+
+Integration with HTML {#html}
+------------
+
+### Origin ### {#html-origin}
+
+The HTML concept of <a for="/">origin</a> should be expanded to contain a boolean
+<dfn>isolated</dfn> flag. This flag is false by default. [[#html-navigation]] describes how a
+<a>Document</a>'s <a for="Document">origin</a> is set to <a>isolated</a> when processing a
+navigation response.
+
+The <a>same origin</a> check should be modified to return false if `A`'s <a>isolated</a> flag does
+not equal `B`'s <a>isolated</a> flag.
+
+ISSUE: Justify why the isolated flag does not need to be serialized
+
+### Processing a navigate response ### {#html-navigation}
+
+<a>Process a navigate response</a> should be modified to construct an origin with its
+<a>isolated</a> flag (as defined in [[#html-origin]]) set to true when the response contains an
+<a>isolation</a> header. Specifically, in Step 5, if <a>extracting header list values</a> given
+<a>isolation</a> and `response`'s <a>header list</a> does not return null, then set the newly
+created <a>Document</a>'s <a for="Document">origin</a>'s <a>isolated</a> flag to true.
+
+### Cross-origin framing of isolated origins ### {#cross-origin-framing}
+
+Isolated origins should not be framed by cross-origin content. Step 1 of <a>Process a navigate
+response</a> should be modified to call [[#should-block-navigation-response]].
+
+### Disowning isolated openers ### {#disown-opener}
+
+When an isolated origin opens a new window to a different origin, that origin should not be able to
+manipulate the isolated origin via the `window.opener` attribute.
+
+<a>Initializing a new Document object</a> should be modified to call [[#disown-isolated-opener]] on
+|browsingContext| and the <a>response</a> used to generate the document.
+
+### Removing cross-origin subframe references ### {#remove-cross-origin-subframe-references}
+
+When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
+references to the isolated origin's window via `window.top` or `window.parent`.
+
+The <a attribute lt="top" for="/">`window.top`</a> attribute algorithm should be modified to return
+null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
+<a for="Document">origin</a> is an <a>isolated origin</a>.
+
+Similarly, the <a attribute lt="parent" for="/">`window.parent`</a> attribute algorithm should be
+modified to return null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
+<a for="Document">origin</a> is an <a>isolated origin</a>.
 
 Integration with Cookies {#cookies}
 ------------
@@ -213,9 +264,10 @@ This section defines modifications to [[!COOKIES]] to support isolated origins.
 Forcing cookies from isolated origins to be same-site means that an attacker cannot initiate an
 authenticated request from a victim's browser to an isolated origin.
 
-When receiving a cookie from a request-uri whose origin is an <a>isolated origin</a>, Section 5.3
-should be modified to set the cookie's `samesite-flag` field to "Strict" if the request-uri's <a
-lt="is-origin-isolated">origin is isolated</a>.
+When receiving a cookie string on a request whose initiator's <a for="Document">origin</a> is
+<a>isolated</a>, if the request's <a for="Request">origin</a> is <a>same origin</a> with the
+initiator's <a for="Document">origin</a>, Section 5.3 should be modified to set the cookie's
+`samesite-flag` field to "Strict".
 
 ### Double-keyed storage ### {#double-keyed-cookies}
 
@@ -267,71 +319,19 @@ use __Host- on all cookies.
 ISSUE: Is this all a moot point assuming that something like StoragePartition is used to build
 isolated origins?
 
-Integration with HTML {#html}
-------------
+## Integration with Fetch ## {#fetch}
 
-### Cross-origin framing of isolated origins ### {#cross-origin-framing}
+Fetch should be modified to treat a request as same-origin even though its <a>current url</a>'s <a
+for="/">origin</a> will not have its <a>isolated</a> flag set.
 
-Isolated origins should not be framed by cross-origin content. Step 1 of <a>Process a navigate
-response</a> should be modified to call [[#should-block-navigation-response]].
+The <a>same origin</a> check in Step 12 of <a lt="main-fetch">main fetch</a> should be modified to read:
+- Let `unisolated origin` be a copy of `request`'s <a for="Request">origin</a>. Unset `unisolated
+  origin`'s <a>isolated</a> flag. `request`'s <a>current url</a>'s <a for="/">origin</a> is <a>same
+  origin</a> with `request`'s <a for="Request">origin</a> or `unisolated origin`, and <a>CORS
+  flag</a> is unset
 
-### DOM storage ### {#dom-storage}
-
-When an origin becomes isolated, it should use its own DOM storage separate from what it used before
-being isolated.
-
-#### `localStorage` #### {#localstorage}
-
-Instead of providing a <a>Storage</a> object for each <a for="/">origin</a>, the `localStorage`
-object should provide two <a>Storage</a> objects, one for isolated origins and one for non-isolated
-origins. Step 3 of
-<a lt="storage object initialisation steps">the `Storage` object initialization steps</a> for
-`localStorage` should be modified to read as follows:
-
-3. Check to see if the user agent has allocated a local storage area for the `(origin, isolated)`
-   pair, where `origin` is the <a for="/">origin</a> of the <a>Document</a> of the <a>Window</a>
-   object on which the attribute was accessed, and `isolated` is a boolean flag that is true if the
-   <a for="/">origin</a> is an <a>isolated origin</a> and false otherwise. If it has not, create a
-   new storage area for that `(origin, isolated)` pair.
-
-ISSUE: Like cookies, this is addressed "automatically" by the use of a sufficiently robust
-isolation primitive.
-
-#### `sessionStorage` #### {#sessionstorage}
-
-{{sessionStorage}} should be modified as follows. Each <a>top-level browsing context</a> should have
-a unique set of session storage areas, one for each `(origin, isolated)` pair, where `isolated` is a
-boolean flag that is true if the <a for="/">`origin`</a> is an <a>isolated origin</a> and false
-otherwise.
-
-When a new <a>Document</a> is created in a <a>browsing context</a> which has a <a>top-level browsing
-context</a>, the user agent must check to see if that <a>top-level browsing context</a> has a
-session storage area for the pair `(origin, isolated)`, where `origin` is the
-document's <a for="/">origin</a> and `isolated` is true if `origin` is an <a>isolated origin</a> and
-false otherwise. If it does, then that is the <a>Document</a>'s assigned session storage area. If it
-does not, a new storage area for that document's <a for="Document">origin</a> must be created, and
-then <i>that</i> is the <a>Document</a>'s assigned session storage area.
-
-### Disowning isolated openers ### {#disown-opener}
-
-When an isolated origin opens a new window to a different origin, that origin should not be able to
-manipulate the isolated origin via the `window.opener` attribute.
-
-<a>Initializing a new Document object</a> should be modified to call [[#disown-isolated-opener]] on
-|browsingContext| and the <a>response</a> used to generate the document.
-
-### Removing cross-origin subframe references ### {#remove-cross-origin-subframe-references}
-
-When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
-references to the isolated origin's window via `window.top` or `window.parent`.
-
-The <a attribute lt="top" for="/">`window.top`</a> attribute algorithm should be modified to return
-null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
-<a for="Document">origin</a> is an <a>isolated origin</a>.
-
-Similarly, the <a attribute lt="parent" for="/">`window.parent`</a> attribute algorithm should be
-modified to return null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
-<a for="Document">origin</a> is an <a>isolated origin</a>.
+Similar modifications should be made to the <a>same origin</a> check in <a>HTTP fetch</a> and
+<a>HTTP-redirect fetch</a>.
 
 Algorithms {#algorithms}
 ============
@@ -347,20 +347,18 @@ cross-origin.
 
 1. If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
-2. Let |navigation origin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
-   serialization of an origin">unicode serialization</a> of |navigation response|'s <a
-   for="response">url</a>'s {{URL/origin}}.
+2. If <a>extracting header list values</a> given <a>isolation</a> and `response`'s <a>header
+   list</a> returns null, return "`Allowed`".
 
-3. If |navigation origin| is not <a lt="is-origin-isolated">an isolated origin</a>, return
-  "`Allowed`".
+3. Let |current| be |target|.
 
-4. Let |current| be |target|.
+4. Let |navigation origin| be a copy of |navigation response|'s <a for="Response">url</a>'s <a
+   for="/">origin</a>. Set |navigation origin|'s <a>isolated</a> flag to true.
 
-5. While |current| has a <a>parent browsing context</a> (|parent|):
+4.  While |current| has a <a>parent browsing context</a> (|parent|):
   1. Set |current| to |parent|.
-  2. Let |origin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
-     serialization of an origin">unicode serialization</a> of |parent|'s <a>active document</a>'s
-     <a>relevant settings object</a>'s <a for="environment settings object">origin</a>.
+  2. Let |origin| be <a>active document</a>'s <a>relevant settings object</a>'s <a for="environment
+     settings object">origin</a>.
   3. If |origin| is not <a>same origin</a> with |navigation origin|, return "`Blocked`".
 
 6. Return "`Allowed`".
@@ -375,19 +373,18 @@ isolated origin.
 
 1. If |browsingContext| does not have an <a>opener browsing context</a>, then abort these steps.
 
-2. Let |openedOrigin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
-   serialization of an origin">unicode serialization</a> of |response|'s <a for="response">url</a>'s
-   {{URL/origin}}.
+2. Let |openedOrigin| be a copy of |response|'s <a for="response">url</a>'s {{URL/origin}}.
 
-3. Let |openerOrigin| be the result of executing the <a>URL parser</a> on the <a lt="unicode
-   serialization of an origin">unicode serialization</a> of |browsingContext|'s <a>opener browsing
-   context</a>'s <a>active document</a>'s <a>relevant settings object</a>'s
-   <a for="environment settings object">origin</a>.
+3. Let |openerOrigin| be |browsingContext|'s <a>opener browsing context</a>'s <a>active
+   document</a>'s <a>relevant settings object</a>'s <a for="environment settings object">origin</a>.
+
+4. If |openerOrigin| is not an <a>isolated origin</a>, abort these steps.
+
+5. Set |openedOrigin|'s <a>isolated</a> flag to true.
 
 4. If |openedOrigin| is <a>same origin</a> with |openerOrigin|, then abort these steps.
 
-5. If |openerOrigin| <a lt="is-origin-isolated">is an isolated origin</a>, then |browsingContext|
-   should <a>disown its opener</a>.
+5. |browsingContext| should <a>disown its opener</a>.
 
 Security Considerations {#security}
 ============
