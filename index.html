@@ -1365,7 +1365,7 @@ Possible extra rowspan handling
   <div class="head">
    <p data-fill-with="logo"></p>
    <h1 class="p-name no-ref" id="title">Isolated Origins</h1>
-   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2017-03-01">1 March 2017</time></span></h2>
+   <h2 class="no-num no-toc no-ref heading settled" id="subtitle"><span class="content">A Collection of Interesting Ideas, <time class="dt-updated" datetime="2017-03-03">3 March 2017</time></span></h2>
    <div data-fill-with="spec-metadata">
     <dl>
      <dt>Version History:
@@ -1386,7 +1386,7 @@ Possible extra rowspan handling
    <div data-fill-with="warning"></div>
    <p class="copyright" data-fill-with="copyright"><a href="http://creativecommons.org/publicdomain/zero/1.0/" rel="license"><img alt="CC0" src="https://licensebuttons.net/p/zero/1.0/80x15.png"></a> To the extent possible under law, the editors have waived all copyright
 and related or neighboring rights to this work.
-In addition, as of 1 March 2017,
+In addition, as of 3 March 2017,
 the editors have made this specification available under the <a href="http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0" rel="license">Open Web Foundation Agreement Version 1.0</a>,
 which is available at http://www.openwebfoundation.org/legal/the-owf-1-0-agreements/owfa-1-0.
 Parts of this work may be from another specification document.  If so, those parts are instead covered by the license of that specification document. </p>
@@ -1554,14 +1554,11 @@ break the communication channels between <code>very-important.com</code> and <co
      <p>Likewise, when <code>very-important.com</code> is opened from a cross-origin window, it will <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its
   opener</a>, and the return value of <code class="idl"><a data-link-type="idl" href="https://html.spec.whatwg.org/multipage/webappapis.html#dom-document-open">open()</a></code> in the opener context will be <code>null</code>.</p>
     <li data-md="">
-     <p>All cookies set by <code>very-important.com</code> will be forced to be <a data-link-type="dfn" href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#same-site-cookies">same-site cookies</a>. This
-  prevents <code>evil.com</code> from initiating authenticated requests to <code>very-important.com</code>. Further, all
-  cookies set on <code>very-important.com</code> (including cookies set by responses to cross-origin
-  requests) will be double-keyed and not sent on requests that occur outside the isolated
-  context. This prevents <code>evil.com</code> from attacking ambient authority granted to <code>very-important.com</code>'s cross-site dependencies by virtue of being embedded in <code>very-important.com</code>.</p>
-   </ol>
-   <p class="issue" id="issue-10cbfaa6"><a class="self-link" href="#issue-10cbfaa6"></a> "Strict" same-site cookies?</p>
-   <ol start="5">
+     <p>All cookies set by <code>very-important.com</code> will be forced to be strict <a data-link-type="dfn" href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#same-site-cookies">same-site
+  cookies</a>. This prevents <code>evil.com</code> from initiating authenticated requests to <code>very-important.com</code>. Further, all cookies set on <code>very-important.com</code> (including cookies set by
+  responses to cross-origin requests) will be double-keyed and not sent on requests that occur
+  outside the isolated context. This prevents <code>evil.com</code> from attacking ambient authority granted
+  to <code>very-important.com</code>'s cross-site dependencies by virtue of being embedded in <code>very-important.com</code>.</p>
     <li data-md="">
      <p>Navigation into the isolated origin will be regulated by a navigation manager.  Code from
   the isolated origin will get to validate each navigation before allowing it to proceed.</p>
@@ -1968,7 +1965,6 @@ may indeed do so, but it’s not the primary goal.<a href="#issue-f5ac66d0"> ↵
    <div class="issue"> Given that a navigation manager enables linkability, it may not make sense to suggest there
 is a necessary tradeoff, at least in this respect.<a href="#issue-4c7e6390"> ↵ </a></div>
    <div class="issue"> Maybe mention that this would be facilited by ambient authority?<a href="#issue-15bc6f6b"> ↵ </a></div>
-   <div class="issue"> "Strict" same-site cookies?<a href="#issue-10cbfaa6"> ↵ </a></div>
    <div class="issue"> Update this with David’s navigation manager proposal.<a href="#issue-85cb04a8"> ↵ </a></div>
    <div class="issue"> Does per-site process isolation as implemented today address UXSS?<a href="#issue-0a8e4094"> ↵ </a></div>
    <div class="issue"> Better define what the UI experience should be, to whatever extent makes sense in this
