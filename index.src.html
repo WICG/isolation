@@ -262,9 +262,6 @@ in which the top-level document is the same <a>isolated origin</a>. This prevent
 attacking ambient authority that an isolated origin's cross-site dependencies obtain by virtue of
 being embedded in the isolated origin.
 
-ISSUE: "Double-keyed" is an implementation detail that might not accurately portray how this works
-if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)
-
 This section defines modifications to [[!COOKIES]] to support these double-keyed cookies.
 
 #### Storage model #### {#cookies-storage-model}
@@ -278,9 +275,6 @@ the <a>request</a>'s <a>client</a>'s
 `top origin` is an <a>isolated origin</a>, then then the user agent should set the `isolated-origin`
 cookie field to `top origin`. Otherwise, the user agent should set the `isolated-origin` cookie
 field to the empty string.
-
-ISSUE: It doesn't seem that the isolated-origin field is necessary.  (Again, assuming that something
-like StoragePartition is used to build isolated origins.)
 
 ISSUE: define this section for Worker-based requests
 
@@ -300,9 +294,6 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.
-
-ISSUE: Is this all a moot point assuming that something like StoragePartition is used to build
-isolated origins?
 
 ## Integration with Fetch ## {#fetch}
 

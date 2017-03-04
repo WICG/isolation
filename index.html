@@ -1617,8 +1617,6 @@ cookie should be double-keyed, such that the cookie is only sent on requests ini
 in which the top-level document is the same <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-5">isolated origin</a>. This prevents attackers from
 attacking ambient authority that an isolated origin’s cross-site dependencies obtain by virtue of
 being embedded in the isolated origin.</p>
-   <p class="issue" id="issue-5f38c031"><a class="self-link" href="#issue-5f38c031"></a> "Double-keyed" is an implementation detail that might not accurately portray how this works
-if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)</p>
    <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support these double-keyed cookies.</p>
    <h5 class="heading settled" data-level="4.2.2.1" id="cookies-storage-model"><span class="secno">4.2.2.1. </span><span class="content">Storage model</span><a class="self-link" href="#cookies-storage-model"></a></h5>
    <p>The storage model of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to keep track of when cookies are set in a
@@ -1626,8 +1624,6 @@ top-level isolated origin as follows. Section 5.3 of <a data-link-type="biblio" 
 additional <code>isolated-origin</code> field for each cookie. When processing a cookie, if the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> has a non-null <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>, then let <code>top origin</code> be the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> of
 the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>. If <code>top origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-6">isolated origin</a>, then then the user agent should set the <code>isolated-origin</code> cookie field to <code>top origin</code>. Otherwise, the user agent should set the <code>isolated-origin</code> cookie
 field to the empty string.</p>
-   <p class="issue" id="issue-c7bb9149"><a class="self-link" href="#issue-c7bb9149"></a> It doesn’t seem that the isolated-origin field is necessary.  (Again, assuming that something
-like StoragePartition is used to build isolated origins.)</p>
    <p class="issue" id="issue-66f1abd9"><a class="self-link" href="#issue-66f1abd9"></a> define this section for Worker-based requests</p>
    <h5 class="heading settled" data-level="4.2.2.2" id="cookie-header"><span class="secno">4.2.2.2. </span><span class="content">The Cookie header</span><a class="self-link" href="#cookie-header"></a></h5>
    <p><a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to ensure that cookies that were set on an isolated origin are not
@@ -1645,8 +1641,6 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.</p>
-   <p class="issue" id="issue-da6e6590"><a class="self-link" href="#issue-da6e6590"></a> Is this all a moot point assuming that something like StoragePartition is used to build
-isolated origins?</p>
    <h3 class="heading settled" data-level="4.3" id="fetch"><span class="secno">4.3. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#fetch"></a></h3>
    <p>Fetch should be modified to treat a request as same-origin even though its <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url">current url</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> will not have its <a data-link-type="dfn" href="#isolated" id="ref-for-isolated-7">isolated</a> flag set.</p>
    <p>The <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> check in Step 12 of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#main-fetch">main fetch</a> should be modified to read:</p>
@@ -1959,18 +1953,12 @@ is a necessary tradeoff, at least in this respect.<a href="#issue-4c7e6390"> ↵
    <div class="issue"> how are Isolation headers processed for Workers?<a href="#issue-9d6e1b7b"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>
    <div class="issue"> Justify why the isolated flag does not need to be serialized<a href="#issue-5f02e78b"> ↵ </a></div>
-   <div class="issue"> "Double-keyed" is an implementation detail that might not accurately portray how this works
-if isolated origins are built on top of a pre-existing isolation mechanism.  (StoragePartition?)<a href="#issue-5f38c031"> ↵ </a></div>
-   <div class="issue"> It doesn’t seem that the isolated-origin field is necessary.  (Again, assuming that something
-like StoragePartition is used to build isolated origins.)<a href="#issue-c7bb9149"> ↵ </a></div>
    <div class="issue"> define this section for Worker-based requests<a href="#issue-66f1abd9"> ↵ </a></div>
    <div class="issue"> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.<a href="#issue-cad8c46e"> ↵ </a></div>
-   <div class="issue"> Is this all a moot point assuming that something like StoragePartition is used to build
-isolated origins?<a href="#issue-da6e6590"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
    <b><a href="#isolated-origin">#isolated-origin</a></b><b>Referenced in:</b>
