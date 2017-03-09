@@ -29,6 +29,9 @@ spec: HTML; urlPrefix: https://html.spec.whatwg.org/
 spec: SAMESITECOOKIES; urlPrefix: https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00
   type: dfn
     text: same-site cookies
+spec: Service Worker; urlPrefix: https://w3c.github.io/ServiceWorker/
+  type: dfn
+    text: update-algorithm; url: update-algorithm
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: dfn
     text: WSP; url: appendix-B.1
@@ -170,6 +173,14 @@ Key Concepts {#concepts}
 An <dfn>isolated origin</dfn> is an <a for="/">origin</a> that has opted in to isolate itself from
 other origins on the web, using the mechanisms defined in this specification.
 
+User agents have an <dfn>isolated origin store</dfn>, which is a list of
+<a lt="isolated origin">isolated origins</a>.
+
+When asked if an <dfn>origin is isolated</dfn>, an <a>isolated origin store</a> will return true if
+the given origin appears in its list, and false otherwise.
+
+ISSUE: Expand to have an expiration time for each isolated origin in the store.
+
 Opting into isolation {#delivery}
 ============
 
@@ -180,8 +191,9 @@ the name and value of the header are described by the following ABNF grammar [[!
     "Isolation:" *<a>WSP</a> "1" *<a>WSP</a>
 </pre>
 
-[[#html-navigation]] describes how the <a>isolation</a> header is processed to create a
-<a>Document</a> with an isolated origin.
+ISSUE: Add a max-age
+
+[[#fetch]] describes how the <a>isolation</a> header is processed.
 
 ISSUE: how are Isolation headers processed for Workers?
 
@@ -196,22 +208,13 @@ Integration with HTML {#html}
 ### Origin ### {#html-origin}
 
 The HTML concept of <a for="/">origin</a> should be expanded to contain a boolean
-<dfn>isolated</dfn> flag. This flag is false by default. [[#html-navigation]] describes how a
-<a>Document</a>'s <a for="Document">origin</a> is set to <a>isolated</a> when processing a
-navigation response.
+<dfn>isolated</dfn> getter. This getter returns true if the <a>origin is isolated</a> and false
+otherwise.
 
-The <a>same origin</a> check should be modified to return false if `A`'s <a>isolated</a> flag does
-not equal `B`'s <a>isolated</a> flag.
+The <a>same origin</a> check should be modified to return false if `A` is <a lt="origin is
+isolated">isolated</a> but `B` is not, or vice versa.
 
 ISSUE: Justify why the isolated flag does not need to be serialized
-
-### Processing a navigate response ### {#html-navigation}
-
-<a>Process a navigate response</a> should be modified to construct an origin with its
-<a>isolated</a> flag (as defined in [[#html-origin]]) set to true when the response contains an
-<a>isolation</a> header. Specifically, in Step 5, if <a>extracting header list values</a> given
-<a>isolation</a> and `response`'s <a>header list</a> does not return null, then set the newly
-created <a>Document</a>'s <a for="Document">origin</a>'s <a>isolated</a> flag to true.
 
 ### Cross-origin framing of isolated origins ### {#cross-origin-framing}
 
@@ -238,6 +241,21 @@ null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
 Similarly, the <a attribute lt="parent" for="/">`window.parent`</a> attribute algorithm should be
 modified to return null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
 <a for="Document">origin</a> is an <a>isolated origin</a>.
+
+Integration with Service Worker {#service-worker}
+------------
+
+An isolated origin uses a <a>service worker</a> to perform security checks on navigations. By
+default, every navigation to an isolated origin fails, unless the origin has a <a>service worker</a>
+which explicitly allows it.
+
+ISSUE: Instead of failing, redirect blocked navigations to the top-level site
+
+A <a>service worker</a> has an <dfn for="service worker">isolated</dfn> flag. The <a lt="update-algorithm">Update</a>
+algorithm should be modified in Step 7.10 to set |isolated| to true if <a>extracting header list
+values</a> given <a>isolation</a> and |response|'s <a>header list</a> does not return null. A new
+step in Step 9 of that algorithm should set |worker|'s <a for="service worker">isolated</a> flag to
+true if |isolated| is true.
 
 Integration with Cookies {#cookies}
 ------------
@@ -297,17 +315,7 @@ use __Host- on all cookies.
 
 ## Integration with Fetch ## {#fetch}
 
-Fetch should be modified to treat a request as same-origin even though its <a>current url</a>'s <a
-for="/">origin</a> will not have its <a>isolated</a> flag set.
-
-The <a>same origin</a> check in Step 12 of <a lt="main-fetch">main fetch</a> should be modified to read:
-- Let `unisolated origin` be a copy of `request`'s <a for="Request">origin</a>. Unset `unisolated
-  origin`'s <a>isolated</a> flag. `request`'s <a>current url</a>'s <a for="/">origin</a> is <a>same
-  origin</a> with `request`'s <a for="Request">origin</a> or `unisolated origin`, and <a>CORS
-  flag</a> is unset
-
-Similar modifications should be made to the <a>same origin</a> check in <a>HTTP fetch</a> and
-<a>HTTP-redirect fetch</a>.
+Fetch should be updated to call [[#isolate-an-origin]] on |response| after Step 13 of <a>HTTP-redirect fetch</a>.
 
 Algorithms {#algorithms}
 ============
@@ -323,18 +331,18 @@ cross-origin.
 
 1. If |target| is not a <a>nested browsing context</a>, return "`Allowed`".
 
-2. If <a>extracting header list values</a> given <a>isolation</a> and `response`'s <a>header
-   list</a> returns null, return "`Allowed`".
+2. If |navigation response|'s <a for="response">url</a>'s <a for="url">origin</a> is not an
+   <a>isolated origin</a>, then return "`Allowed`".
 
 3. Let |current| be |target|.
 
-4. Let |navigation origin| be a copy of |navigation response|'s <a for="Response">url</a>'s <a
+4. Let |navigation origin| be a copy of |navigation response|'s <a for="response">url</a>'s <a
    for="/">origin</a>. Set |navigation origin|'s <a>isolated</a> flag to true.
 
 4.  While |current| has a <a>parent browsing context</a> (|parent|):
   1. Set |current| to |parent|.
-  2. Let |origin| be <a>active document</a>'s <a>relevant settings object</a>'s <a for="environment
-     settings object">origin</a>.
+  2. Let |origin| be |current|'s <a>active document</a>'s <a>relevant settings object</a>'s <a
+     for="environment settings object">origin</a>.
   3. If |origin| is not <a>same origin</a> with |navigation origin|, return "`Blocked`".
 
 6. Return "`Allowed`".
@@ -356,11 +364,24 @@ isolated origin.
 
 4. If |openerOrigin| is not an <a>isolated origin</a>, abort these steps.
 
-5. Set |openedOrigin|'s <a>isolated</a> flag to true.
+5. If |openedOrigin| is <a>same origin</a> with |openerOrigin|, then abort these steps.
 
-4. If |openedOrigin| is <a>same origin</a> with |openerOrigin|, then abort these steps.
+6. |browsingContext| should <a>disown its opener</a>.
 
-5. |browsingContext| should <a>disown its opener</a>.
+<h3 id="isolate-an-origin" algorithm>
+    Isolate an origin
+</h3>
+
+This algorithm is called from <a>HTTP-redirect fetch</a> to process an <a>isolation</a> header on a
+<a>response</a> |response|.
+
+1. If <a>extracting header list values</a> given <a>isolation</a> and |response|'s <a>header
+   list</a> returns null, then abort these steps.
+
+2. Add |response|'s <a for="response">url</a>'s <a for="url">origin</a> to the user agent's
+   <a>isolated origin store</a>.
+
+ISSUE: parse and process max-age
 
 Security Considerations {#security}
 ============
