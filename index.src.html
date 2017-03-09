@@ -20,6 +20,7 @@ Markup Shorthands: css off, markdown on
 <pre class="anchors">
 spec: Fetch; urlPrefix: https://fetch.spec.whatwg.org/
   type: dfn
+    text: http-network fetch; url: http-network-fetch
     text: main-fetch; url: main-fetch
 spec: HTML; urlPrefix: https://html.spec.whatwg.org/
   type: dfn
@@ -193,11 +194,20 @@ the name and value of the header are described by the following ABNF grammar [[!
 
 ISSUE: Add a max-age
 
-[[#fetch]] describes how the <a>isolation</a> header is processed.
-
-ISSUE: how are Isolation headers processed for Workers?
+[[#fetch-header]] describes how the <a>isolation</a> header is processed.
 
 ISSUE: the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...
+
+Controlling navigations {#navigation}
+============
+
+An <a>isolated origin</a> can use a <a>service worker</a> to perform security checks on
+navigations. By default, every navigation to an isolated origin fails, unless the origin has a
+<a>service worker</a> which explicitly allows it.
+
+[[#fetch-navigation-checks]] and [[#process-a-navigate-response]] describe how the Fetch and HTML
+specs are modified to fail navigations to an <a>isolated origin</a> unless a <a>service worker</a>
+has performed security checks on them.
 
 Integrations {#integrations}
 ============
@@ -242,20 +252,13 @@ Similarly, the <a attribute lt="parent" for="/">`window.parent`</a> attribute al
 modified to return null if `context`'s <a>top-level browsing context</a>'s <a>active document</a>'s
 <a for="Document">origin</a> is an <a>isolated origin</a>.
 
-Integration with Service Worker {#service-worker}
-------------
+### Process a navigate response ### {#process-a-navigate-response}
 
-An isolated origin uses a <a>service worker</a> to perform security checks on navigations. By
-default, every navigation to an isolated origin fails, unless the origin has a <a>service worker</a>
-which explicitly allows it.
-
-ISSUE: Instead of failing, redirect blocked navigations to the top-level site
-
-A <a>service worker</a> has an <dfn for="service worker">isolated</dfn> flag. The <a lt="update-algorithm">Update</a>
-algorithm should be modified in Step 7.10 to set |isolated| to true if <a>extracting header list
-values</a> given <a>isolation</a> and |response|'s <a>header list</a> does not return null. A new
-step in Step 9 of that algorithm should set |worker|'s <a for="service worker">isolated</a> flag to
-true if |isolated| is true.
+<a>Process a navigate response</a> should be modified to fail a navigation to an <a>isolated
+origin</a> if it has not been explicitly allowed by a <a>service worker</a> for that
+origin. Specifically, Step 1 should be modified to include the condition:
+  - |response|'s <a for="url">url</a>'s <a for="url">origin</a> is an <a>isolated origin</a> and
+    |request|'s <a>allow isolated navigation</a> flag is unset.
 
 Integration with Cookies {#cookies}
 ------------
@@ -315,7 +318,33 @@ use __Host- on all cookies.
 
 ## Integration with Fetch ## {#fetch}
 
-Fetch should be updated to call [[#isolate-an-origin]] on |response| after Step 13 of <a>HTTP-redirect fetch</a>.
+### Navigation checks ### {#fetch-navigation-checks}
+
+The Fetch spec should be modified to give <a>request</a> a boolean
+<dfn>allow isolated navigation</dfn> flag, which is false by default. This flag is checked on
+navigations to isolated origins in [[#process-a-navigate-response]].
+
+The <a>Request</a> class should be modified to have an <dfn method
+for="Request"><code>allowIsolatedNavigation()</code></dfn> method, which, when invoked, must run
+these steps:
+
+1. Let |origin| be <a>current settings object</a>'s <a for="environment">origin</a>.
+
+2. If |origin| is not <a>same origin</a> with |request|'s <a for="request">current url</a>'s <a
+   for="url">origin</a>, then abort these steps.
+
+   ISSUE: should this throw an exception instead?
+
+3. Set |request|'s <a>allow isolated navigation</a> flag to true.
+
+NOTE: A service worker or a consumer of the Fetch API must call <a>allowIsolatedNavigation()</a> on
+a <a>Request</a> in order for a navigation to an isolated origin to be allowed.
+
+ISSUE: Does this allow for navigation requests to redirect to isolated origins? Do we want it to?
+
+### Processing <a>isolation</a> headers ### {#fetch-header}
+
+Fetch should be updated to call [[#isolate-an-origin]] on |response| after Step 13 of <a>HTTP-network fetch</a>.
 
 Algorithms {#algorithms}
 ============
@@ -372,14 +401,20 @@ isolated origin.
     Isolate an origin
 </h3>
 
-This algorithm is called from <a>HTTP-redirect fetch</a> to process an <a>isolation</a> header on a
+This algorithm is called from <a>HTTP-network fetch</a> to process an <a>isolation</a> header on a
 <a>response</a> |response|.
 
 1. If <a>extracting header list values</a> given <a>isolation</a> and |response|'s <a>header
    list</a> returns null, then abort these steps.
 
-2. Add |response|'s <a for="response">url</a>'s <a for="url">origin</a> to the user agent's
-   <a>isolated origin store</a>.
+2. Let |origin| be |response|'s <a for="response">url</a>'s <a for="url">origin</a>.
+
+3. If |origin| is not an <a>isolated origin</a>, set |request|'s <a>allow isolated navigation</a>
+   flag to true.
+
+NOTE: This step ensures that the first navigation to an isolated origin is allowed.
+
+4. Add |origin| to the user agent's <a>isolated origin store</a>.
 
 ISSUE: parse and process max-age
 

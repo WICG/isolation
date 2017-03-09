@@ -1410,40 +1410,46 @@ content.</p>
      </ol>
     <li><a href="#concepts"><span class="secno">2</span> <span class="content">Key Concepts</span></a>
     <li><a href="#delivery"><span class="secno">3</span> <span class="content">Opting into isolation</span></a>
+    <li><a href="#navigation"><span class="secno">4</span> <span class="content">Controlling navigations</span></a>
     <li>
-     <a href="#integrations"><span class="secno">4</span> <span class="content">Integrations</span></a>
+     <a href="#integrations"><span class="secno">5</span> <span class="content">Integrations</span></a>
      <ol class="toc">
       <li>
-       <a href="#html"><span class="secno">4.1</span> <span class="content">Integration with HTML</span></a>
+       <a href="#html"><span class="secno">5.1</span> <span class="content">Integration with HTML</span></a>
        <ol class="toc">
-        <li><a href="#html-origin"><span class="secno">4.1.1</span> <span class="content">Origin</span></a>
-        <li><a href="#cross-origin-framing"><span class="secno">4.1.2</span> <span class="content">Cross-origin framing of isolated origins</span></a>
-        <li><a href="#disown-opener"><span class="secno">4.1.3</span> <span class="content">Disowning isolated openers</span></a>
-        <li><a href="#remove-cross-origin-subframe-references"><span class="secno">4.1.4</span> <span class="content">Removing cross-origin subframe references</span></a>
+        <li><a href="#html-origin"><span class="secno">5.1.1</span> <span class="content">Origin</span></a>
+        <li><a href="#cross-origin-framing"><span class="secno">5.1.2</span> <span class="content">Cross-origin framing of isolated origins</span></a>
+        <li><a href="#disown-opener"><span class="secno">5.1.3</span> <span class="content">Disowning isolated openers</span></a>
+        <li><a href="#remove-cross-origin-subframe-references"><span class="secno">5.1.4</span> <span class="content">Removing cross-origin subframe references</span></a>
+        <li><a href="#process-a-navigate-response"><span class="secno">5.1.5</span> <span class="content">Process a navigate response</span></a>
        </ol>
-      <li><a href="#service-worker"><span class="secno">4.2</span> <span class="content">Integration with Service Worker</span></a>
       <li>
-       <a href="#cookies"><span class="secno">4.3</span> <span class="content">Integration with Cookies</span></a>
+       <a href="#cookies"><span class="secno">5.2</span> <span class="content">Integration with Cookies</span></a>
        <ol class="toc">
-        <li><a href="#forcing-cookies-samesite"><span class="secno">4.3.1</span> <span class="content">Forcing cookies to be same-site</span></a>
+        <li><a href="#forcing-cookies-samesite"><span class="secno">5.2.1</span> <span class="content">Forcing cookies to be same-site</span></a>
         <li>
-         <a href="#double-keyed-cookies"><span class="secno">4.3.2</span> <span class="content">Double-keyed storage</span></a>
+         <a href="#double-keyed-cookies"><span class="secno">5.2.2</span> <span class="content">Double-keyed storage</span></a>
          <ol class="toc">
-          <li><a href="#cookies-storage-model"><span class="secno">4.3.2.1</span> <span class="content">Storage model</span></a>
-          <li><a href="#cookie-header"><span class="secno">4.3.2.2</span> <span class="content">The Cookie header</span></a>
+          <li><a href="#cookies-storage-model"><span class="secno">5.2.2.1</span> <span class="content">Storage model</span></a>
+          <li><a href="#cookie-header"><span class="secno">5.2.2.2</span> <span class="content">The Cookie header</span></a>
          </ol>
        </ol>
-      <li><a href="#fetch"><span class="secno">4.4</span> <span class="content">Integration with Fetch</span></a>
+      <li>
+       <a href="#fetch"><span class="secno">5.3</span> <span class="content">Integration with Fetch</span></a>
+       <ol class="toc">
+        <li><a href="#fetch-navigation-checks"><span class="secno">5.3.1</span> <span class="content">Navigation checks</span></a>
+        <li><a href="#fetch-header"><span class="secno">5.3.2</span> <span class="content">Processing <span>isolation</span> headers</span></a>
+       </ol>
      </ol>
     <li>
-     <a href="#algorithms"><span class="secno">5</span> <span class="content">Algorithms</span></a>
+     <a href="#algorithms"><span class="secno">6</span> <span class="content">Algorithms</span></a>
      <ol class="toc">
-      <li><a href="#should-block-navigation-response"><span class="secno">5.1</span> <span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span></a>
-      <li><a href="#disown-isolated-opener"><span class="secno">5.2</span> <span class="content"> Disown an isolated opener </span></a>
-      <li><a href="#isolate-an-origin"><span class="secno">5.3</span> <span class="content"> Isolate an origin </span></a>
+      <li><a href="#should-block-navigation-response"><span class="secno">6.1</span> <span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span></a>
+      <li><a href="#disown-isolated-opener"><span class="secno">6.2</span> <span class="content"> Disown an isolated opener </span></a>
+      <li><a href="#isolate-an-origin"><span class="secno">6.3</span> <span class="content"> Isolate an origin </span></a>
      </ol>
-    <li><a href="#security"><span class="secno">6</span> <span class="content">Security Considerations</span></a>
-    <li><a href="#privacy"><span class="secno">7</span> <span class="content">Privacy Considerations</span></a>
+    <li><a href="#security"><span class="secno">7</span> <span class="content">Security Considerations</span></a>
+    <li><a href="#privacy"><span class="secno">8</span> <span class="content">Privacy Considerations</span></a>
     <li><a href="#conformance"><span class="secno"></span> <span class="content"> Conformance</span></a>
     <li>
      <a href="#index"><span class="secno"></span> <span class="content">Index</span></a>
@@ -1582,60 +1588,64 @@ the name and value of the header are described by the following ABNF grammar <a 
 <pre>"Isolation:" *<a data-link-type="dfn" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">WSP</a> "1" *<a data-link-type="dfn" href="https://tools.ietf.org/html/rfc5234#appendix-B.1">WSP</a>
 </pre>
    <p class="issue" id="issue-0aa4c638"><a class="self-link" href="#issue-0aa4c638"></a> Add a max-age</p>
-   <p><a href="#fetch">§4.4 Integration with Fetch</a> describes how the <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-1">isolation</a> header is processed.</p>
-   <p class="issue" id="issue-9d6e1b7b"><a class="self-link" href="#issue-9d6e1b7b"></a> how are Isolation headers processed for Workers?</p>
+   <p><a href="#fetch-header">§5.3.2 Processing isolation headers</a> describes how the <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-1">isolation</a> header is processed.</p>
    <p class="issue" id="issue-9e404d85"><a class="self-link" href="#issue-9e404d85"></a> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...</p>
-   <h2 class="heading settled" data-level="4" id="integrations"><span class="secno">4. </span><span class="content">Integrations</span><a class="self-link" href="#integrations"></a></h2>
-   <h3 class="heading settled" data-level="4.1" id="html"><span class="secno">4.1. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html"></a></h3>
-   <h4 class="heading settled" data-level="4.1.1" id="html-origin"><span class="secno">4.1.1. </span><span class="content">Origin</span><a class="self-link" href="#html-origin"></a></h4>
+   <h2 class="heading settled" data-level="4" id="navigation"><span class="secno">4. </span><span class="content">Controlling navigations</span><a class="self-link" href="#navigation"></a></h2>
+   <p>An <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a> can use a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> to perform security checks on
+navigations. By default, every navigation to an isolated origin fails, unless the origin has a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> which explicitly allows it.</p>
+   <p><a href="#fetch-navigation-checks">§5.3.1 Navigation checks</a> and <a href="#process-a-navigate-response">§5.1.5 Process a navigate response</a> describe how the Fetch and HTML
+specs are modified to fail navigations to an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a> unless a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> has performed security checks on them.</p>
+   <h2 class="heading settled" data-level="5" id="integrations"><span class="secno">5. </span><span class="content">Integrations</span><a class="self-link" href="#integrations"></a></h2>
+   <h3 class="heading settled" data-level="5.1" id="html"><span class="secno">5.1. </span><span class="content">Integration with HTML</span><a class="self-link" href="#html"></a></h3>
+   <h4 class="heading settled" data-level="5.1.1" id="html-origin"><span class="secno">5.1.1. </span><span class="content">Origin</span><a class="self-link" href="#html-origin"></a></h4>
    <p>The HTML concept of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#concept-origin">origin</a> should be expanded to contain a boolean <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="isolated">isolated</dfn> getter. This getter returns true if the <a data-link-type="dfn" href="#origin-is-isolated" id="ref-for-origin-is-isolated-1">origin is isolated</a> and false
 otherwise.</p>
    <p>The <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> check should be modified to return false if <code>A</code> is <a data-link-type="dfn" href="#origin-is-isolated" id="ref-for-origin-is-isolated-2">isolated</a> but <code>B</code> is not, or vice versa.</p>
    <p class="issue" id="issue-5f02e78b"><a class="self-link" href="#issue-5f02e78b"></a> Justify why the isolated flag does not need to be serialized</p>
-   <h4 class="heading settled" data-level="4.1.2" id="cross-origin-framing"><span class="secno">4.1.2. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
+   <h4 class="heading settled" data-level="5.1.2" id="cross-origin-framing"><span class="secno">5.1.2. </span><span class="content">Cross-origin framing of isolated origins</span><a class="self-link" href="#cross-origin-framing"></a></h4>
    <p>Isolated origins should not be framed by cross-origin content. Step 1 of <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate
-response</a> should be modified to call <a href="#should-block-navigation-response">§5.1 Should navigation response in target be blocked?</a>.</p>
-   <h4 class="heading settled" data-level="4.1.3" id="disown-opener"><span class="secno">4.1.3. </span><span class="content">Disowning isolated openers</span><a class="self-link" href="#disown-opener"></a></h4>
+response</a> should be modified to call <a href="#should-block-navigation-response">§6.1 Should navigation response in target be blocked?</a>.</p>
+   <h4 class="heading settled" data-level="5.1.3" id="disown-opener"><span class="secno">5.1.3. </span><span class="content">Disowning isolated openers</span><a class="self-link" href="#disown-opener"></a></h4>
    <p>When an isolated origin opens a new window to a different origin, that origin should not be able to
 manipulate the isolated origin via the <code>window.opener</code> attribute.</p>
-   <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#initialise-the-document-object">Initializing a new Document object</a> should be modified to call <a href="#disown-isolated-opener">§5.2 Disown an isolated opener</a> on <var>browsingContext</var> and the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> used to generate the document.</p>
-   <h4 class="heading settled" data-level="4.1.4" id="remove-cross-origin-subframe-references"><span class="secno">4.1.4. </span><span class="content">Removing cross-origin subframe references</span><a class="self-link" href="#remove-cross-origin-subframe-references"></a></h4>
+   <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#initialise-the-document-object">Initializing a new Document object</a> should be modified to call <a href="#disown-isolated-opener">§6.2 Disown an isolated opener</a> on <var>browsingContext</var> and the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> used to generate the document.</p>
+   <h4 class="heading settled" data-level="5.1.4" id="remove-cross-origin-subframe-references"><span class="secno">5.1.4. </span><span class="content">Removing cross-origin subframe references</span><a class="self-link" href="#remove-cross-origin-subframe-references"></a></h4>
    <p>When an isolated origin embeds cross-origin subframes, those subframes should not be able to obtain
 references to the isolated origin’s window via <code>window.top</code> or <code>window.parent</code>.</p>
    <p>The <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-top"><code>window.top</code></a> attribute algorithm should be modified to return
-null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-3">isolated origin</a>.</p>
+null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-5">isolated origin</a>.</p>
    <p>Similarly, the <a class="idl-code" data-link-type="attribute" href="https://html.spec.whatwg.org/multipage/browsers.html#dom-parent"><code>window.parent</code></a> attribute algorithm should be
-modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-4">isolated origin</a>.</p>
-   <h3 class="heading settled" data-level="4.2" id="service-worker"><span class="secno">4.2. </span><span class="content">Integration with Service Worker</span><a class="self-link" href="#service-worker"></a></h3>
-   <p>An isolated origin uses a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> to perform security checks on navigations. By
-default, every navigation to an isolated origin fails, unless the origin has a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> which explicitly allows it.</p>
-   <p class="issue" id="issue-2530cb6b"><a class="self-link" href="#issue-2530cb6b"></a> Instead of failing, redirect blocked navigations to the top-level site</p>
-   <p>A <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> has an <dfn class="dfn-paneled" data-dfn-for="service worker" data-dfn-type="dfn" data-noexport="" id="service-worker-isolated">isolated</dfn> flag. The <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#update-algorithm">Update</a> algorithm should be modified in Step 7.10 to set <var>isolated</var> to true if <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#extract-header-list-values">extracting header list
-values</a> given <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-2">isolation</a> and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list">header list</a> does not return null. A new
-step in Step 9 of that algorithm should set <var>worker</var>’s <a data-link-type="dfn" href="#service-worker-isolated" id="ref-for-service-worker-isolated-1">isolated</a> flag to
-true if <var>isolated</var> is true.</p>
-   <h3 class="heading settled" data-level="4.3" id="cookies"><span class="secno">4.3. </span><span class="content">Integration with Cookies</span><a class="self-link" href="#cookies"></a></h3>
+modified to return null if <code>context</code>'s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-6">isolated origin</a>.</p>
+   <h4 class="heading settled" data-level="5.1.5" id="process-a-navigate-response"><span class="secno">5.1.5. </span><span class="content">Process a navigate response</span><a class="self-link" href="#process-a-navigate-response"></a></h4>
+   <p><a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#process-a-navigate-response">Process a navigate response</a> should be modified to fail a navigation to an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-7">isolated
+origin</a> if it has not been explicitly allowed by a <a data-link-type="dfn" href="https://w3c.github.io/ServiceWorker/#dfn-service-worker">service worker</a> for that
+origin. Specifically, Step 1 should be modified to include the condition:</p>
+   <ul>
+    <li data-md="">
+     <p><var>response</var>’s <a data-link-type="dfn">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-8">isolated origin</a> and <var>request</var>’s <a data-link-type="dfn" href="#allow-isolated-navigation" id="ref-for-allow-isolated-navigation-1">allow isolated navigation</a> flag is unset.</p>
+   </ul>
+   <h3 class="heading settled" data-level="5.2" id="cookies"><span class="secno">5.2. </span><span class="content">Integration with Cookies</span><a class="self-link" href="#cookies"></a></h3>
    <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support isolated origins.</p>
-   <h4 class="heading settled" data-level="4.3.1" id="forcing-cookies-samesite"><span class="secno">4.3.1. </span><span class="content">Forcing cookies to be same-site</span><a class="self-link" href="#forcing-cookies-samesite"></a></h4>
+   <h4 class="heading settled" data-level="5.2.1" id="forcing-cookies-samesite"><span class="secno">5.2.1. </span><span class="content">Forcing cookies to be same-site</span><a class="self-link" href="#forcing-cookies-samesite"></a></h4>
    <p>Forcing cookies from isolated origins to be same-site means that an attacker cannot initiate an
 authenticated request from a victim’s browser to an isolated origin.</p>
    <p>When receiving a cookie string on a request whose initiator’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is <a data-link-type="dfn" href="#isolated" id="ref-for-isolated-1">isolated</a>, if the request’s <a data-link-type="dfn">origin</a> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with the
 initiator’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a>, Section 5.3 should be modified to set the cookie’s <code>samesite-flag</code> field to "Strict".</p>
-   <h4 class="heading settled" data-level="4.3.2" id="double-keyed-cookies"><span class="secno">4.3.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-cookies"></a></h4>
-   <p>When a cookie is set on a request for which the top-level document is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-5">isolated origin</a>, the
+   <h4 class="heading settled" data-level="5.2.2" id="double-keyed-cookies"><span class="secno">5.2.2. </span><span class="content">Double-keyed storage</span><a class="self-link" href="#double-keyed-cookies"></a></h4>
+   <p>When a cookie is set on a request for which the top-level document is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-9">isolated origin</a>, the
 cookie should be double-keyed, such that the cookie is only sent on requests initiated by contexts
-in which the top-level document is the same <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-6">isolated origin</a>. This prevents attackers from
+in which the top-level document is the same <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-10">isolated origin</a>. This prevents attackers from
 attacking ambient authority that an isolated origin’s cross-site dependencies obtain by virtue of
 being embedded in the isolated origin.</p>
    <p>This section defines modifications to <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> to support these double-keyed cookies.</p>
-   <h5 class="heading settled" data-level="4.3.2.1" id="cookies-storage-model"><span class="secno">4.3.2.1. </span><span class="content">Storage model</span><a class="self-link" href="#cookies-storage-model"></a></h5>
+   <h5 class="heading settled" data-level="5.2.2.1" id="cookies-storage-model"><span class="secno">5.2.2.1. </span><span class="content">Storage model</span><a class="self-link" href="#cookies-storage-model"></a></h5>
    <p>The storage model of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to keep track of when cookies are set in a
 top-level isolated origin as follows. Section 5.3 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be modified to store an
 additional <code>isolated-origin</code> field for each cookie. When processing a cookie, if the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> has a non-null <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>, then let <code>top origin</code> be the <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> of
-the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>. If <code>top origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-7">isolated origin</a>, then then the user agent should set the <code>isolated-origin</code> cookie field to <code>top origin</code>. Otherwise, the user agent should set the <code>isolated-origin</code> cookie
+the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>. If <code>top origin</code> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-11">isolated origin</a>, then then the user agent should set the <code>isolated-origin</code> cookie field to <code>top origin</code>. Otherwise, the user agent should set the <code>isolated-origin</code> cookie
 field to the empty string.</p>
    <p class="issue" id="issue-66f1abd9"><a class="self-link" href="#issue-66f1abd9"></a> define this section for Worker-based requests</p>
-   <h5 class="heading settled" data-level="4.3.2.2" id="cookie-header"><span class="secno">4.3.2.2. </span><span class="content">The Cookie header</span><a class="self-link" href="#cookie-header"></a></h5>
+   <h5 class="heading settled" data-level="5.2.2.2" id="cookie-header"><span class="secno">5.2.2.2. </span><span class="content">The Cookie header</span><a class="self-link" href="#cookie-header"></a></h5>
    <p><a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be updated to ensure that cookies that were set on an isolated origin are not
 sent in other contexts outside that origin. In other words, Section 5.4 of <a data-link-type="biblio" href="#biblio-cookies">[COOKIES]</a> should be
 modified to add the following to the list of requirements in step 1:</p>
@@ -1643,7 +1653,7 @@ modified to add the following to the list of requirements in step 1:</p>
     <li data-md="">
      <p>If the cookie’s <code>isolated-origin</code> field is not the empty string, then the <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> must have
 a non-null <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-client">client</a> whose <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#responsible-browsing-context">responsible browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#top-level-browsing-context">top-level browsing
-context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-8">isolated origin</a> and
+context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active Document</a>’s <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document-origin">origin</a> is an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-12">isolated origin</a> and
 is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with the cookie’s <code>isolated-origin</code> field.</p>
    </ul>
    <p class="issue" id="issue-cad8c46e"><a class="self-link" href="#issue-cad8c46e"></a> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
@@ -1651,10 +1661,28 @@ victim.example.com before, evil.example.com can set a cookie for .example.com, w
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.</p>
-   <h3 class="heading settled" data-level="4.4" id="fetch"><span class="secno">4.4. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#fetch"></a></h3>
-   <p>Fetch should be updated to call <a href="#isolate-an-origin">§5.3 Isolate an origin</a> on <var>response</var> after Step 13 of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-http-redirect-fetch">HTTP-redirect fetch</a>.</p>
-   <h2 class="heading settled" data-level="5" id="algorithms"><span class="secno">5. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
-   <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="5.1" id="should-block-navigation-response"><span class="secno">5.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
+   <h3 class="heading settled" data-level="5.3" id="fetch"><span class="secno">5.3. </span><span class="content">Integration with Fetch</span><a class="self-link" href="#fetch"></a></h3>
+   <h4 class="heading settled" data-level="5.3.1" id="fetch-navigation-checks"><span class="secno">5.3.1. </span><span class="content">Navigation checks</span><a class="self-link" href="#fetch-navigation-checks"></a></h4>
+   <p>The Fetch spec should be modified to give <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">request</a> a boolean <dfn class="dfn-paneled" data-dfn-type="dfn" data-noexport="" id="allow-isolated-navigation">allow isolated navigation</dfn> flag, which is false by default. This flag is checked on
+navigations to isolated origins in <a href="#process-a-navigate-response">§5.1.5 Process a navigate response</a>.</p>
+   <p>The <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">Request</a> class should be modified to have an <dfn class="dfn-paneled idl-code" data-dfn-for="Request" data-dfn-type="method" data-export="" id="dom-request-allowisolatednavigation"><code>allowIsolatedNavigation()</code></dfn> method, which, when invoked, must run
+these steps:</p>
+   <ol>
+    <li data-md="">
+     <p>Let <var>origin</var> be <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object">current settings object</a>’s <a data-link-type="dfn">origin</a>.</p>
+    <li data-md="">
+     <p>If <var>origin</var> is not <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>request</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request-current-url">current url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>, then abort these steps.</p>
+     <p class="issue" id="issue-8cbbacd5"><a class="self-link" href="#issue-8cbbacd5"></a> should this throw an exception instead?</p>
+    <li data-md="">
+     <p>Set <var>request</var>’s <a data-link-type="dfn" href="#allow-isolated-navigation" id="ref-for-allow-isolated-navigation-2">allow isolated navigation</a> flag to true.</p>
+   </ol>
+   <p class="note" role="note"><span>NOTE:</span> A service worker or a consumer of the Fetch API must call <a data-link-type="functionish" href="#dom-request-allowisolatednavigation" id="ref-for-dom-request-allowisolatednavigation-1">allowIsolatedNavigation()</a> on
+a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-request">Request</a> in order for a navigation to an isolated origin to be allowed.</p>
+   <p class="issue" id="issue-287ade72"><a class="self-link" href="#issue-287ade72"></a> Does this allow for navigation requests to redirect to isolated origins? Do we want it to?</p>
+   <h4 class="heading settled" data-level="5.3.2" id="fetch-header"><span class="secno">5.3.2. </span><span class="content">Processing <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-2">isolation</a> headers</span><a class="self-link" href="#fetch-header"></a></h4>
+   <p>Fetch should be updated to call <a href="#isolate-an-origin">§6.3 Isolate an origin</a> on <var>response</var> after Step 13 of <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a>.</p>
+   <h2 class="heading settled" data-level="6" id="algorithms"><span class="secno">6. </span><span class="content">Algorithms</span><a class="self-link" href="#algorithms"></a></h2>
+   <h3 class="heading settled algorithm" data-algorithm="Should navigation response in target be blocked?" data-level="6.1" id="should-block-navigation-response"><span class="secno">6.1. </span><span class="content"> Should <var>navigation response</var> in <var>target</var> be blocked? </span><a class="self-link" href="#should-block-navigation-response"></a></h3>
    <p>This algorithm is used to block cross-origin framing of isolated origins. Given a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>navigation response</var>) and a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>target</var>), this algorithm returns "<code>Blocked</code>"
 if <var>navigation response</var> is from an isolated origin and one or more of the ancestors of <var>target</var> is
 cross-origin.</p>
@@ -1662,7 +1690,7 @@ cross-origin.</p>
     <li data-md="">
      <p>If <var>target</var> is not a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#nested-browsing-context">nested browsing context</a>, return "<code>Allowed</code>".</p>
     <li data-md="">
-     <p>If <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> is not an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-9">isolated origin</a>, then return "<code>Allowed</code>".</p>
+     <p>If <var>navigation response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> is not an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-13">isolated origin</a>, then return "<code>Allowed</code>".</p>
     <li data-md="">
      <p>Let <var>current</var> be <var>target</var>.</p>
     <li data-md="">
@@ -1680,7 +1708,7 @@ cross-origin.</p>
     <li data-md="">
      <p>Return "<code>Allowed</code>".</p>
    </ol>
-   <h3 class="heading settled algorithm" data-algorithm="Disown an isolated opener" data-level="5.2" id="disown-isolated-opener"><span class="secno">5.2. </span><span class="content"> Disown an isolated opener </span><a class="self-link" href="#disown-isolated-opener"></a></h3>
+   <h3 class="heading settled algorithm" data-algorithm="Disown an isolated opener" data-level="6.2" id="disown-isolated-opener"><span class="secno">6.2. </span><span class="content"> Disown an isolated opener </span><a class="self-link" href="#disown-isolated-opener"></a></h3>
    <p>Given a <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a> (<var>browsingContext</var>) and a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> (<var>response</var>) used to
 generate a <a data-link-type="dfn" href="https://dom.spec.whatwg.org/#concept-document">document</a>, this algorithm disowns <var>browsingContext</var>’s opener if the opener is an
 isolated origin.</p>
@@ -1693,24 +1721,31 @@ isolated origin.</p>
      <p>Let <var>openerOrigin</var> be <var>browsingContext</var>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#opener-browsing-context">opener browsing context</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active
  document</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#relevant-settings-object">relevant settings object</a>’s <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/webappapis.html#concept-settings-object-origin">origin</a>.</p>
     <li data-md="">
-     <p>If <var>openerOrigin</var> is not an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-10">isolated origin</a>, abort these steps.</p>
+     <p>If <var>openerOrigin</var> is not an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-14">isolated origin</a>, abort these steps.</p>
     <li data-md="">
      <p>If <var>openedOrigin</var> is <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#same-origin">same origin</a> with <var>openerOrigin</var>, then abort these steps.</p>
     <li data-md="">
      <p><var>browsingContext</var> should <a data-link-type="dfn" href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>.</p>
    </ol>
-   <h3 class="heading settled algorithm" data-algorithm="Isolate an origin" data-level="5.3" id="isolate-an-origin"><span class="secno">5.3. </span><span class="content"> Isolate an origin </span><a class="self-link" href="#isolate-an-origin"></a></h3>
-   <p>This algorithm is called from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-http-redirect-fetch">HTTP-redirect fetch</a> to process an <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-3">isolation</a> header on a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> <var>response</var>.</p>
+   <h3 class="heading settled algorithm" data-algorithm="Isolate an origin" data-level="6.3" id="isolate-an-origin"><span class="secno">6.3. </span><span class="content"> Isolate an origin </span><a class="self-link" href="#isolate-an-origin"></a></h3>
+   <p>This algorithm is called from <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> to process an <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-3">isolation</a> header on a <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response">response</a> <var>response</var>.</p>
    <ol>
     <li data-md="">
      <p>If <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#extract-header-list-values">extracting header list values</a> given <a data-link-type="dfn" href="#isolation" id="ref-for-isolation-4">isolation</a> and <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-header-list">header
  list</a> returns null, then abort these steps.</p>
     <li data-md="">
-     <p>Add <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a> to the user agent’s <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-2">isolated origin store</a>.</p>
+     <p>Let <var>origin</var> be <var>response</var>’s <a data-link-type="dfn" href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>’s <a data-link-type="dfn" href="https://url.spec.whatwg.org/#concept-url-origin">origin</a>.</p>
+    <li data-md="">
+     <p>If <var>origin</var> is not an <a data-link-type="dfn" href="#isolated-origin" id="ref-for-isolated-origin-15">isolated origin</a>, set <var>request</var>’s <a data-link-type="dfn" href="#allow-isolated-navigation" id="ref-for-allow-isolated-navigation-3">allow isolated navigation</a> flag to true.</p>
+   </ol>
+   <p class="note" role="note"><span>NOTE:</span> This step ensures that the first navigation to an isolated origin is allowed.</p>
+   <ol start="4">
+    <li data-md="">
+     <p>Add <var>origin</var> to the user agent’s <a data-link-type="dfn" href="#isolated-origin-store" id="ref-for-isolated-origin-store-2">isolated origin store</a>.</p>
    </ol>
    <p class="issue" id="issue-7879800d"><a class="self-link" href="#issue-7879800d"></a> parse and process max-age</p>
-   <h2 class="heading settled" data-level="6" id="security"><span class="secno">6. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
-   <h2 class="heading settled" data-level="7" id="privacy"><span class="secno">7. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
+   <h2 class="heading settled" data-level="7" id="security"><span class="secno">7. </span><span class="content">Security Considerations</span><a class="self-link" href="#security"></a></h2>
+   <h2 class="heading settled" data-level="8" id="privacy"><span class="secno">8. </span><span class="content">Privacy Considerations</span><a class="self-link" href="#privacy"></a></h2>
   </main>
   <div data-fill-with="conformance">
    <h2 class="no-ref no-num heading settled" id="conformance"><span class="content"> Conformance</span><a class="self-link" href="#conformance"></a></h2>
@@ -1861,12 +1896,9 @@ isolated origin.</p>
   <h2 class="no-num no-ref heading settled" id="index"><span class="content">Index</span><a class="self-link" href="#index"></a></h2>
   <h3 class="no-num no-ref heading settled" id="index-defined-here"><span class="content">Terms defined by this specification</span><a class="self-link" href="#index-defined-here"></a></h3>
   <ul class="index">
-   <li>
-    isolated
-    <ul>
-     <li><a href="#isolated">definition of</a><span>, in §4.1.1</span>
-     <li><a href="#service-worker-isolated">dfn for service worker</a><span>, in §4.2</span>
-    </ul>
+   <li><a href="#allow-isolated-navigation">allow isolated navigation</a><span>, in §5.3.1</span>
+   <li><a href="#dom-request-allowisolatednavigation">allowIsolatedNavigation()</a><span>, in §5.3.1</span>
+   <li><a href="#isolated">isolated</a><span>, in §5.1.1</span>
    <li><a href="#isolated-origin">isolated origin</a><span>, in §2</span>
    <li><a href="#isolated-origin-store">isolated origin store</a><span>, in §2</span>
    <li><a href="#isolation">isolation</a><span>, in §3</span>
@@ -1884,9 +1916,10 @@ isolated origin.</p>
     <a data-link-type="biblio">[FETCH]</a> defines the following terms:
     <ul>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request-client">client</a>
+     <li><a href="https://fetch.spec.whatwg.org/#concept-request-current-url">current url</a>
      <li><a href="https://fetch.spec.whatwg.org/#extract-header-list-values">extracting header list values</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-header-list">header list</a>
-     <li><a href="https://fetch.spec.whatwg.org/#concept-http-redirect-fetch">http-redirect fetch</a>
+     <li><a href="https://fetch.spec.whatwg.org/#http-network-fetch">http-network fetch</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-request">request</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response">response</a>
      <li><a href="https://fetch.spec.whatwg.org/#concept-response-url">url</a>
@@ -1899,6 +1932,7 @@ isolated origin.</p>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#active-document">active document</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#browsing-context">browsing context</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#dom-iframe-contentwindow">contentWindow</a>
+     <li><a href="https://html.spec.whatwg.org/multipage/webappapis.html#current-settings-object">current settings object</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#disowned-its-opener">disown its opener</a>
      <li><a href="https://html.spec.whatwg.org/multipage/browsers.html#dom-document-domain">domain</a>
      <li><a href="https://html.spec.whatwg.org/multipage/embedded-content.html#the-iframe-element">iframe</a>
@@ -1929,11 +1963,6 @@ isolated origin.</p>
     <a data-link-type="biblio">[samesitecookies]</a> defines the following terms:
     <ul>
      <li><a href="https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#same-site-cookies">same-site cookies</a>
-    </ul>
-   <li>
-    <a data-link-type="biblio">[service worker]</a> defines the following terms:
-    <ul>
-     <li><a href="https://w3c.github.io/ServiceWorker/#update-algorithm">update-algorithm</a>
     </ul>
    <li>
     <a data-link-type="biblio">[service-workers-1]</a> defines the following terms:
@@ -1977,16 +2006,16 @@ is a necessary tradeoff, at least in this respect.<a href="#issue-4c7e6390"> ↵
    <div class="issue"> Update this with David’s navigation manager proposal.<a href="#issue-85cb04a8"> ↵ </a></div>
    <div class="issue"> Expand to have an expiration time for each isolated origin in the store.<a href="#issue-04349c70"> ↵ </a></div>
    <div class="issue"> Add a max-age<a href="#issue-0aa4c638"> ↵ </a></div>
-   <div class="issue"> how are Isolation headers processed for Workers?<a href="#issue-9d6e1b7b"> ↵ </a></div>
    <div class="issue"> the isolate-me HTTP header needs to be sent and/or processed before the Set-Cookie header...<a href="#issue-9e404d85"> ↵ </a></div>
    <div class="issue"> Justify why the isolated flag does not need to be serialized<a href="#issue-5f02e78b"> ↵ </a></div>
-   <div class="issue"> Instead of failing, redirect blocked navigations to the top-level site<a href="#issue-2530cb6b"> ↵ </a></div>
    <div class="issue"> define this section for Worker-based requests<a href="#issue-66f1abd9"> ↵ </a></div>
    <div class="issue"> these cookie changes don’t prevent all session fixation attacks. If a user has never visited
 victim.example.com before, evil.example.com can set a cookie for .example.com, which will be sent on
 the request when the user first navigates to victim.example.com. The isolated origin can mitigate
 this by using __Host- cookies for sensitive cookies. Maybe isolated origins should be required to
 use __Host- on all cookies.<a href="#issue-cad8c46e"> ↵ </a></div>
+   <div class="issue"> should this throw an exception instead?<a href="#issue-8cbbacd5"> ↵ </a></div>
+   <div class="issue"> Does this allow for navigation requests to redirect to isolated origins? Do we want it to?<a href="#issue-287ade72"> ↵ </a></div>
    <div class="issue"> parse and process max-age<a href="#issue-7879800d"> ↵ </a></div>
   </div>
   <aside class="dfn-panel" data-for="isolated-origin">
@@ -1994,51 +2023,64 @@ use __Host- on all cookies.<a href="#issue-cad8c46e"> ↵ </a></div>
    <ul>
     <li><a href="#ref-for-isolated-origin-1">2. Key Concepts</a>
     <li><a href="#ref-for-isolated-origin-2">3. Opting into isolation</a>
-    <li><a href="#ref-for-isolated-origin-3">4.1.4. Removing cross-origin subframe references</a> <a href="#ref-for-isolated-origin-4">(2)</a>
-    <li><a href="#ref-for-isolated-origin-5">4.3.2. Double-keyed storage</a> <a href="#ref-for-isolated-origin-6">(2)</a>
-    <li><a href="#ref-for-isolated-origin-7">4.3.2.1. Storage model</a>
-    <li><a href="#ref-for-isolated-origin-8">4.3.2.2. The Cookie header</a>
-    <li><a href="#ref-for-isolated-origin-9">5.1. 
+    <li><a href="#ref-for-isolated-origin-3">4. Controlling navigations</a> <a href="#ref-for-isolated-origin-4">(2)</a>
+    <li><a href="#ref-for-isolated-origin-5">5.1.4. Removing cross-origin subframe references</a> <a href="#ref-for-isolated-origin-6">(2)</a>
+    <li><a href="#ref-for-isolated-origin-7">5.1.5. Process a navigate response</a> <a href="#ref-for-isolated-origin-8">(2)</a>
+    <li><a href="#ref-for-isolated-origin-9">5.2.2. Double-keyed storage</a> <a href="#ref-for-isolated-origin-10">(2)</a>
+    <li><a href="#ref-for-isolated-origin-11">5.2.2.1. Storage model</a>
+    <li><a href="#ref-for-isolated-origin-12">5.2.2.2. The Cookie header</a>
+    <li><a href="#ref-for-isolated-origin-13">6.1. 
     Should navigation response in target be blocked? </a>
-    <li><a href="#ref-for-isolated-origin-10">5.2. 
+    <li><a href="#ref-for-isolated-origin-14">6.2. 
     Disown an isolated opener </a>
+    <li><a href="#ref-for-isolated-origin-15">6.3. 
+    Isolate an origin </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="isolated-origin-store">
    <b><a href="#isolated-origin-store">#isolated-origin-store</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-isolated-origin-store-1">2. Key Concepts</a>
-    <li><a href="#ref-for-isolated-origin-store-2">5.3. 
+    <li><a href="#ref-for-isolated-origin-store-2">6.3. 
     Isolate an origin </a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="origin-is-isolated">
    <b><a href="#origin-is-isolated">#origin-is-isolated</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-origin-is-isolated-1">4.1.1. Origin</a> <a href="#ref-for-origin-is-isolated-2">(2)</a>
+    <li><a href="#ref-for-origin-is-isolated-1">5.1.1. Origin</a> <a href="#ref-for-origin-is-isolated-2">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="isolation">
    <b><a href="#isolation">#isolation</a></b><b>Referenced in:</b>
    <ul>
     <li><a href="#ref-for-isolation-1">3. Opting into isolation</a>
-    <li><a href="#ref-for-isolation-2">4.2. Integration with Service Worker</a>
-    <li><a href="#ref-for-isolation-3">5.3. 
+    <li><a href="#ref-for-isolation-2">5.3.2. Processing isolation headers</a>
+    <li><a href="#ref-for-isolation-3">6.3. 
     Isolate an origin </a> <a href="#ref-for-isolation-4">(2)</a>
    </ul>
   </aside>
   <aside class="dfn-panel" data-for="isolated">
    <b><a href="#isolated">#isolated</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-isolated-1">4.3.1. Forcing cookies to be same-site</a>
-    <li><a href="#ref-for-isolated-2">5.1. 
+    <li><a href="#ref-for-isolated-1">5.2.1. Forcing cookies to be same-site</a>
+    <li><a href="#ref-for-isolated-2">6.1. 
     Should navigation response in target be blocked? </a>
    </ul>
   </aside>
-  <aside class="dfn-panel" data-for="service-worker-isolated">
-   <b><a href="#service-worker-isolated">#service-worker-isolated</a></b><b>Referenced in:</b>
+  <aside class="dfn-panel" data-for="allow-isolated-navigation">
+   <b><a href="#allow-isolated-navigation">#allow-isolated-navigation</a></b><b>Referenced in:</b>
    <ul>
-    <li><a href="#ref-for-service-worker-isolated-1">4.2. Integration with Service Worker</a>
+    <li><a href="#ref-for-allow-isolated-navigation-1">5.1.5. Process a navigate response</a>
+    <li><a href="#ref-for-allow-isolated-navigation-2">5.3.1. Navigation checks</a>
+    <li><a href="#ref-for-allow-isolated-navigation-3">6.3. 
+    Isolate an origin </a>
+   </ul>
+  </aside>
+  <aside class="dfn-panel" data-for="dom-request-allowisolatednavigation">
+   <b><a href="#dom-request-allowisolatednavigation">#dom-request-allowisolatednavigation</a></b><b>Referenced in:</b>
+   <ul>
+    <li><a href="#ref-for-dom-request-allowisolatednavigation-1">5.3.1. Navigation checks</a>
    </ul>
   </aside>
 <script>/* script-dfn-panel */
