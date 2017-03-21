@@ -1,0 +1,197 @@
+<pre class="metadata">
+Title: Isolated Origins Navigation Manager Concept
+Status: DREAM
+Shortname: origin-isolation-navmanager
+Level: None
+Editor: David Ross
+Editor: Emily Stark
+Abstract:
+  This document describes the concept of a navigation manager for use as part
+  of Isolated Origins.
+Indent: 2
+Markup Shorthands: css off, markdown on
+</pre>
+
+<pre class="anchors">
+spec: IsolatedOrigins; urlPrefix: https://wicg.github.io/isolation/index.html
+  type: dfn
+    text: Isolated Origins
+    text: Framing will be prohibited; url: cross-origin-framing
+spec: Entry Point Regulation; urlPrefix: https://w3c.github.io/webappsec-epr/
+  type: dfn
+    text: Entry Point Regulation (EPR)
+spec: Service Workers; urlPrefix: https://w3c.github.io/ServiceWorker/
+  type: dfn
+    text: Service Workers
+    text: Fetch Events; url: fetchevent-interface
+    text: third-party service worker; url: link-type-serviceworker
+    text: registerForeignFetch(); url: register-foreign-fetch-method
+</pre>
+
+
+Introduction {#intro}
+============
+
+The Chrome <a>Isolated Origins</a> specification enables apps to opt-in to an
+environment that is isolated from other web applications in the same desktop
+session.  The isolation is intended to prevent cross-site scripting (XSS) and
+other web-based attacks.
+
+This document aims to identify and define the best possible solution to the
+following open question from an early version of the Isolated Origins
+specification:
+
+<i>How should navigations be limited? Limiting navigations breaks linkability
+and hinders functionality, but improves defense against reflected XSS and
+CSRF. Striking the right balance here will be tricky. We could only allow
+navigations to the root URL on the isolated origin, or we could transform
+navigations into a navigation to the root URL with some sort of message to allow
+the site to decide whether the navigation should go through. Or foreign fetch
+could be modified to allow the isolated origin’s Service Worker to intercept the
+navigation and decide whether it should be allowed.</i>
+
+
+Potential solutions considered {#potentialsolutions}
+============
+
+1. <a>Entry Point Regulation (EPR)</a>
+2. Only allow navigations to the top-level page.
+3. Allow navigations to the top-level page, also allowing navigations to
+  arbitrary paths sans query params / fragments.
+4. Flexible navigation manager implemented by the isolated application
+
+
+Factors being considered in the selection of a preferred solution {#factors}
+============
+
+1. Any solution should leverage existing web technologies to the maximum extent
+  possible so as to avoid reinventing the wheel.
+
+2. XSS in paths (without querystring data).<br>
+  <i>A problem with solution 3.</i><br>
+
+3. Allowing navigation only to a top level page is arbitrarily restrictive.<br>
+  <i>A problem with solution 2.</i><br>
+
+4. Generally speaking, input to an isolated web app should go through a formal
+  API that can be appropriately regulated based on data about the input.
+  (Consider the benefit of postMessage vs. legacy message passing mechanisms.)
+  <br>
+  <i>A problem with solution 3.</i><br>
+
+5. Should avoid TOCTOU problems and list maintenance issues.<br>
+  <i>A problem with solution 1.</i><br>
+
+6. Should avoid hampering deep linking.<br>
+  <i>A problem with solutions 1, 2, and 3, but likely not 4.</i><br>
+
+7. With any approach, it's fair to say that the goal is to centrally regulate
+  data coming into the application via navigations at the client, in a way that
+  is "secure by default."<br>
+  <i>Not a problem with any approach being discussed.</i><br>
+
+8. The mailing list unsubscription scenario needs to work.  That is, the case
+  where a link in e-mail takes the user to the isolated app and passes some data
+  to the app.<br>
+  <i>A problem with solutions 2 and 3.</i><br>
+
+9. CSRF via cross-origin POST.<br>
+  <i>Out of scope as this is addressed more generally by Isolated Origins.</i>
+  <br>
+
+10. Secure by default.<br>
+  <i>A drawback of solution 3.</i><br>
+
+11. Flexible enough to allow for the development of full-featured isolated web
+  applications.<br>
+
+
+Preferred solution {#preferredsolution}
+============
+
+The navigation manager approach appears to be most preferable when considering
+the list of factors above.  The biggest drawback of the navigation manager
+approach is that it relies on the isolated app not to implement a navigation
+manager carelessly.  But navigation managers should be easy to audit, and secure
+sample implementations may be provided.  It would be nice to see popular
+open-source navigation managers emerge.
+
+
+Proposed navigation manager mechanism {#mechanism}
+============
+
+Without an implemented navigation manager, only basic HTTP GET based navigations
+to the root path of an isolated app would be allowed.  This would let malicious
+sites spawn an instance of the malicious app in a new window, but nothing more.
+(<a>Framing will be prohibited</a> by Isolated Origins.)
+
+To avoid re-inventing the wheel, the navigation manager mechanism would leverage
+the existing browser support for <a>Service Workers</a> and <a>Fetch Events</a>.
+To implement a navigation manager, an isolated origin would first install a
+<a>third-party service worker</a>.  Next it would call
+`registerNavigationManager()`.  (This concept is based upon
+<code><a>registerForeignFetch()</a></code>.)
+
+Example call to `registerNavigationManager()`:
+
+<code>
+self.addEventListener('install', event => {<br>
+&nbsp;&nbsp;event.registerNavigationManager();<br>
+});<br>
+</code>
+
+It should not be possible to register a navigation manager outside of the
+isolated environment.  Otherwise it may be possible for a non-isolated site to
+register a navigation manager that is then enforced once the origin becomes
+isolated.
+
+The isolated origin should generally fail to navigate unless a registered
+navigation manager is consulted.  The only exception would be for HTTP GET-based
+navigations that do not include path or querystring data.  This restriction
+helps ensure that the system overall fails secure by default.
+
+Subsequent to navigation manager registration, the service worker would set up
+a `navigationsafetycheck` event handler.  The `navigationsafetycheck` event as
+detailed below does not need to fetch the resource itself.  It has access to the
+request and can make a decision that the browser will then consider as it
+fetches the resource in question.
+
+Example `navigationsafetycheck` event handler:
+
+<code>
+self.addEventListener('navigationsafetycheck', event => {<br>
+&nbsp;&nbsp;var result = { method: event.methods.BLOCK, withCredentials: false};
+<br>
+&nbsp;&nbsp;if (event.request.method == 'GET') {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;var url = new URL(event.request.url);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if (url.protocol == 'https:') {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if ((url.pathname == '/') && (url.search ==
+  '?') && (url.hash == '#')) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.method =
+  event.methods.ALLOW;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.redirectUrl =
+  "https://" + url.hostname + "/";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;result.method =
+  event.methods.REDIRECT;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;}<br>
+&nbsp;&nbsp;event.respondWith(result);<br>
+});<br>
+</code>
+
+The `navigationsafetycheck` event handler will be called for any resource
+request that is in scope for navigaiton management.  This means the following
+conditions are satisfied:
+
+- The resource request is a navigation.  (As opposed to a non-navigational
+  resource request.)
+- The resource request is in-scope for the service worker.
+- The resource request is in the origin of the isolated app.
+- The navigation was initiated by a source external to the isolated
+  origin.  Navigations from the same origin that are initiated outside of the
+  isolated origin environment are considered external.
+
+Navigations initiated from outside of an isolated origin can not target a frame
+within the isolated origin.

@@ -36,6 +36,9 @@ spec: Service Worker; urlPrefix: https://w3c.github.io/ServiceWorker/
 spec: RFC5234; urlPrefix: https://tools.ietf.org/html/rfc5234
   type: dfn
     text: WSP; url: appendix-B.1
+spec: NAVIGATIONMANAGER; urlPrefix: https://wicg.github.io/isolation/navmanager.html
+  type: dfn
+    text: navigation manager
 </pre>
 
 Introduction {#intro}
@@ -157,10 +160,8 @@ break the communication channels between `very-important.com` and `evil.com`. Wh
     to `very-important.com`'s cross-site dependencies by virtue of being embedded in
     `very-important.com`.
 
-5.  Navigation into the isolated origin will be regulated by a navigation manager.  Code from
+5.  Navigation into the isolated origin will be regulated by a <a>navigation manager</a>.  Code from
     the isolated origin will get to validate each navigation before allowing it to proceed.
-
-    ISSUE: Update this with David's navigation manager proposal.
 
 6.  The user agent should load `example.com` into a separate process from other web content.
 
