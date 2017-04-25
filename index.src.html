@@ -149,9 +149,6 @@ break the communication channels between `very-important.com` and `evil.com`. Wh
     call to {{Window/open()}} will return `null`. That is, the user agent will act as though
     <a>noopener</a> is specified on outgoing links and {{Window/open()}} calls.
 
-    Likewise, when `very-important.com` is opened from a cross-origin window, it will <a>disown its
-    opener</a>, and the return value of {{Window/open()}} in the opener context will be `null`.
-
 4.  All cookies set by `very-important.com` will be forced to be strict <a>same-site
     cookies</a>. This prevents `evil.com` from initiating authenticated requests to
     `very-important.com`. Further, all cookies set on `very-important.com` (including cookies set by
