@@ -160,7 +160,7 @@ break the communication channels between `very-important.com` and `evil.com`. Wh
 5.  Navigation into the isolated origin will be regulated by a <a>navigation manager</a>.  Code from
     the isolated origin will get to validate each navigation before allowing it to proceed.
 
-6.  The user agent should load `example.com` into a separate process from other web content.
+6.  The user agent should load `very-important.com` into a separate process from other web content, including cross-origin content that it embeds, if possible.
 
     Note: This is not a firm guarantee (especially since not all browsers implement per-site process
     isolation at all), but rather a best-effort attempt to mitigate the risks of UXSS bugs.
