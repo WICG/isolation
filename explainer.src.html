@@ -131,8 +131,8 @@ opt into all of these protections.
     along with requests to `foo.example.com`.
 
 5.  Double-keyed storage. When an isolated origin makes a request to a third-party origin
-    third-party.com, that request should use a separate cookie jar from when any other origin makes
-    a request to third-party.com. Similarly, if an isolated origin embeds `third-party.com` in an
+    `third-party.com`, that request should use a separate cookie jar from when any other origin makes
+    a request to `third-party.com`. Similarly, if an isolated origin embeds `third-party.com` in an
     <{iframe}>, the frame should use a separate cookie jar and separate storage (such as
     {{localStorage}}) from when `third-party.com` is loaded in any other context.
 
